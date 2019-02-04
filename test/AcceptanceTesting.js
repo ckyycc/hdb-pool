@@ -5,10 +5,10 @@ const should = require('should');
 const ResourceState = require('../lib/types/ResourceState');
 const RequestState = require('../lib/types/RequestState');
 const params = {
-  HOST: 'testserver',
+  HOST: 'fakeServer',
   PORT: '30015',
   UID: 'HANA_SYSTEM',
-  PWD: '12345'
+  PWD: 'hana12345'
 };
 
 describe('#Acceptance-PoolManager', function () {
@@ -28,14 +28,19 @@ describe('#Acceptance-PoolManager', function () {
   });
 
   describe('#creation', function () {
-    it('#Shoud have minimum resource created during creation', function () {
+    it('#Shoud have minimum resources being created during creation', function () {
       const poolSize = 3;
       poolManager = new PoolManager(params, {min: poolSize});
       should(poolManager['_pool'].poolSize).equals(poolSize);
     });
+
+    it('#Shoud not have any resource in available list during creation', function () {
+      const poolSize = 3;
+      poolManager = new PoolManager(params, {min: poolSize});
+      should(poolManager['_pool'].availableResourceNum).equals(0);
+    });
   });
   describe('#getConnection', function () {
-
     beforeEach(function () {
       poolManager = new PoolManager(params, opts);
     });
@@ -74,7 +79,7 @@ describe('#Acceptance-PoolManager', function () {
           should(resource.state).equals(ResourceState.ALLOCATED);
           // we should still have one available connection in the available list
           should(poolManager['_pool'].availableResourceNum).equals(0);
-          // we should have two resource in total
+          // we should have 2 resources in total
           should(poolManager['_pool'].poolSize).equals(2);
         });
       });
@@ -92,7 +97,7 @@ describe('#Acceptance-PoolManager', function () {
             should(resource.state).equals(ResourceState.ALLOCATED);
             // we should still have no available connection in the available list
             should(poolManager['_pool'].availableResourceNum).equals(0);
-            // we should have 3 resource in total
+            // we should have 3 resources in total
             should(poolManager['_pool'].poolSize).equals(3);
           });
         });
@@ -112,7 +117,7 @@ describe('#Acceptance-PoolManager', function () {
               should(resource.state).equals(ResourceState.ALLOCATED);
               // we should still have no available connection in the available list
               should(poolManager['_pool'].availableResourceNum).equals(0);
-              // we should have 3 resource in total
+              // we should have 4 resources in total
               should(poolManager['_pool'].poolSize).equals(4);
             });
           });
@@ -133,7 +138,7 @@ describe('#Acceptance-PoolManager', function () {
                 should(resource.state).equals(ResourceState.ALLOCATED);
                 // we should still have no available connection in the available list
                 should(poolManager['_pool'].availableResourceNum).equals(0);
-                // we should have 3 resource in total
+                // we should have 5 resources in total
                 should(poolManager['_pool'].poolSize).equals(5);
               });
             });
