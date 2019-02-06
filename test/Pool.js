@@ -6,6 +6,7 @@ const sinon = require('sinon');
 const Pool = require('../lib/Pool');
 const Resource = require('../lib/Resource');
 const RequestState = require('../lib/types/RequestState');
+const ResourceState = require('../lib/types/ResourceState');
 const Stub = require('./utils/Stub');
 
 describe('Pool', function () {
@@ -297,6 +298,11 @@ describe('Pool', function () {
     it('should add the resource to available resource list', function () {
       pool.addResourceToAvailable(resource).catch(() => '');
       should(pool['_availableResources'].length).exactly(1);
+    });
+    it('the state of resource added to available resource list should set to idle', function () {
+      resource['_state'] = ResourceState.ALLOCATED;
+      pool.addResourceToAvailable(resource).catch(() => '');
+      should(resource.state).exactly(ResourceState.IDLE);
     });
     it('should not call _notifyAllOperators once', function () {
       spy = sinon.spy(pool, '_notifyAllOperators');

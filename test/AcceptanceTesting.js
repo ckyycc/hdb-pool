@@ -10,14 +10,16 @@ const params = {
   UID: 'HANA_SYSTEM',
   PWD: 'hana12345'
 };
-
+// Below testing cases are for getConnection with min 2, max 5, maxWaitingRequests 6.
+const opts = {
+  min: 2,
+  max: 5,
+  maxWaitingRequests: 6,
+  checkInterval: 50000,
+  acquireTimeout: 800
+};
 describe('#Acceptance-PoolManager', function () {
   let poolManager, connection, stub;
-  before(() => {
-    const connectionInfos = StubHANAClient.getStubCreateConnectionSucceed();
-    connection = connectionInfos.connection;
-    stub = connectionInfos.stub;
-  });
   after(() => {
     StubHANAClient.restore(stub);
   });
@@ -28,31 +30,28 @@ describe('#Acceptance-PoolManager', function () {
   });
 
   describe('#creation', function () {
+    before(() => {
+      const connectionInfos = StubHANAClient.getStubCreateConnectionSucceed();
+      connection = connectionInfos.connection;
+      stub = connectionInfos.stub;
+    });
     it('#Shoud have minimum resources being created during creation', function () {
       const poolSize = 3;
       poolManager = new PoolManager(params, {min: poolSize});
       should(poolManager['_pool'].poolSize).equals(poolSize);
     });
-
     it('#Shoud not have any resource in available list during creation', function () {
       const poolSize = 3;
       poolManager = new PoolManager(params, {min: poolSize});
       should(poolManager['_pool'].availableResourceNum).equals(0);
     });
   });
+
   describe('#getConnection', function () {
     beforeEach(function () {
       poolManager = new PoolManager(params, opts);
     });
 
-    // Below testing cases are for getConnection with min 2, max 5, maxWaitingRequests 6.
-    const opts = {
-      min: 2,
-      max: 5,
-      maxWaitingRequests: 6,
-      checkInterval: 50000,
-      acquireTimeout: 800
-    };
     it('#call getConnection once should get one connection from pool (two in total).', function () {
       // Utils.registerEventForLoging(poolManager);
       return poolManager.getConnect().then(conn => {
@@ -67,8 +66,7 @@ describe('#Acceptance-PoolManager', function () {
         should(poolManager['_pool'].poolSize).equals(2);
       });
     });
-
-    it('#call getConnection twice should get all the connections from pool (two in total).', function () {
+    it('#call getConnection twice should get two connections from pool (two in total).', function () {
       // Utils.registerEventForLoging(poolManager);
       return poolManager.getConnect().then(() => {
         return poolManager.getConnect().then(conn2 => {
@@ -84,8 +82,7 @@ describe('#Acceptance-PoolManager', function () {
         });
       });
     });
-
-    it('#call getConnection three times should get all the three connections from pool.', function () {
+    it('#call getConnection three times should get three connections from pool.', function () {
       // Utils.registerEventForLoging(poolManager);
       return poolManager.getConnect().then(() => {
         return poolManager.getConnect().then(() => {
@@ -103,8 +100,7 @@ describe('#Acceptance-PoolManager', function () {
         });
       });
     });
-
-    it('#call getConnection four times, should get all the the three connections from pool.', function () {
+    it('#call getConnection four times, should get four connections from pool.', function () {
       // Utils.registerEventForLoging(poolManager);
       return poolManager.getConnect().then(() => {
         return poolManager.getConnect().then(() => {
@@ -124,8 +120,7 @@ describe('#Acceptance-PoolManager', function () {
         });
       });
     });
-
-    it('#call getConnection five times, should get all the the three connections from pool.', function () {
+    it('#call getConnection five times, should get five connections from pool.', function () {
       // Utils.registerEventForLoging(poolManager);
       return poolManager.getConnect().then(() => {
         return poolManager.getConnect().then(() => {
@@ -146,7 +141,6 @@ describe('#Acceptance-PoolManager', function () {
         });
       });
     });
-
     it('#call getConnection 6 times, 1 request should fail (timeout), the other five should be successful.', function () {
       // Utils.registerEventForLoging(poolManager);
       return poolManager.getConnect().then(() => {
@@ -169,4 +163,52 @@ describe('#Acceptance-PoolManager', function () {
       });
     });
   });
+
+  describe('#release', function () {
+    beforeEach(function () {
+      poolManager = new PoolManager(params, opts);
+    });
+    it('#call release should return the connection to pool.', function () {
+      return poolManager.getConnect().then(conn => {
+        const availableResNum = poolManager['_pool'].availableResourceNum;
+        return poolManager.release(conn).then(() => {
+          should(poolManager['_pool'].availableResourceNum).equals(availableResNum + 1);
+        });
+      });
+    });
+    it('#call release should not change the pool size.', function () {
+      return poolManager.getConnect().then(conn => {
+        const poolResNum = poolManager['_pool'].poolSize;
+        return poolManager.release(conn).then(() => {
+          should(poolManager['_pool'].poolSize).equals(poolResNum);
+        });
+      });
+    });
+    it('#call release should set the state of the connection resource to idle.', function () {
+      return poolManager.getConnect().then(conn => {
+        const resource = poolManager['_pool'].getResourceFromConnectionInAll(conn);
+        should(resource.state).equals(ResourceState.ALLOCATED);
+        return poolManager.release(conn).then(() => {
+          should(resource.state).equals(ResourceState.IDLE);
+        });
+      });
+    });
+  });
+
+  describe('#destroy', function () {
+    beforeEach(function () {
+      poolManager = new PoolManager(params, opts);
+    });
+    it('#call destroy should destroy the connection from pool.', function () {
+      return poolManager.getConnect().then(conn => {
+        console.log('1111', poolManager['_pool']._allResources);
+        should(poolManager['_pool'].getResourceFromConnectionInAll(conn) == null).equals(false);
+        return poolManager.destroy(conn).then(() => {
+          console.log('2222', poolManager['_pool']._allResources);
+          should(poolManager['_pool'].getResourceFromConnectionInAll(conn) == null).equals(true);
+        });
+      });
+    });
+  });
+
 });
