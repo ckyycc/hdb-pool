@@ -19,10 +19,11 @@ class StubHANAClient extends Stub {
   }
 
   /**
-   * Create stub for createConnection of hana-client for the succeed case
+   * Create stub for createConnection of hana-client for the succeed case.
+   * Always returns the same connection for stub
    * @return {any} return {conn: conn, stub: stub}
    */
-  static getStubCreateConnectionSucceed() {
+  static getStubCreateConnectionSucceedWithSingleConnection() {
     const connection = {PROP: Symbol('TEST_CONNECTION_CREATION')};
     connection.state = () => 'connected';
     connection.connect = (parameter, cb) => cb();
@@ -33,7 +34,8 @@ class StubHANAClient extends Stub {
   }
 
   /**
-   * Create stub for createConnection of hana-client for the succeed case (will return new connection every time)
+   * Create stub for createConnection of hana-client for the succeed case.
+   * Returns new connection for stub
    * @return {stub}
    */
   static getStucCreateConnectionSucceedWithNewConnection() {

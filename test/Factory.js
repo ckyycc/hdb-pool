@@ -15,7 +15,7 @@ describe('Factory', function () {
       });
     });
     it('should return promise with the created connection if no error', function () {
-      const {connection, stub} = StubHANAClient.getStubCreateConnectionSucceed();
+      const {connection, stub} = StubHANAClient.getStubCreateConnectionSucceedWithSingleConnection();
       return factory.create().then((result) => {
         should(result).be.exactly(connection);
         StubHANAClient.restore(stub);
