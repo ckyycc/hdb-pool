@@ -22,7 +22,7 @@ describe('#Acceptance-PoolManager', function () {
   let poolManager, connection, stub;
   afterEach(function () {
     if (poolManager != null) {
-      poolManager.clear().catch(() => '');
+      poolManager['_pool'].clear().catch(() => '');
     }
   });
 
@@ -36,7 +36,7 @@ describe('#Acceptance-PoolManager', function () {
       StubHANAClient.restore(stub);
     });
 
-    describe('#creation', function () {
+    describe('#new', function () {
       it('#Shoud have minimum resources being created during creation', function () {
         const poolSize = 3;
         poolManager = new PoolManager(params, {min: poolSize});
@@ -180,13 +180,13 @@ describe('#Acceptance-PoolManager', function () {
   });
 
   describe('#test-with-new-connection', function () {
+    before(() => {
+      stub = StubHANAClient.getStucCreateConnectionSucceedWithNewConnection();
+    });
+    after(() => {
+      StubHANAClient.restore(stub);
+    });
     describe('#destroy', function () {
-      before(() => {
-        stub = StubHANAClient.getStucCreateConnectionSucceedWithNewConnection();
-      });
-      after(() => {
-        StubHANAClient.restore(stub);
-      });
       beforeEach(function () {
         poolManager = new PoolManager(params, opts);
       });
@@ -216,6 +216,151 @@ describe('#Acceptance-PoolManager', function () {
             should(poolManager['_pool'].poolSize).equals(poolSize);
           });
         });
+      });
+    });
+
+    describe('#getConnection + release', function () {
+      beforeEach(function () {
+        poolManager = new PoolManager(params, opts);
+      });
+      it('#if no resource is available, getConnection can only be done successfully after release.', function () {
+        let connection;
+        return poolManager.getConnect()
+          .then(() => poolManager.getConnect())
+          .then(() => poolManager.getConnect())
+          .then(() => poolManager.getConnect())
+          .then(() => poolManager.getConnect())
+          .then((conn) => {
+            connection = conn;
+            return poolManager.getConnect();
+          })
+          .catch(() => {
+            // failed for the sixth request
+            should(poolManager['_pool'].availableResourceNum).equals(0);
+            return poolManager.release(connection)
+              .then(() => {
+                should(poolManager['_pool'].availableResourceNum).equals(1);
+                return poolManager.getConnect();
+              })
+              .then((conn) => {
+                should(poolManager['_pool'].availableResourceNum).equals(0);
+                should(conn).exactly(connection);
+              });
+          });
+      });
+      it('#only one getConnection can only be done successfully after one release.', function () {
+        return poolManager.getConnect()
+          .then(() => poolManager.getConnect())
+          .then(() => poolManager.getConnect())
+          .then(() => poolManager.getConnect())
+          .then(() => poolManager.getConnect())
+          .then((conn) => {
+            return poolManager.release(conn)
+              .then(() => {
+                should(poolManager['_pool'].availableResourceNum).equals(1);
+                return poolManager.getConnect();
+              })
+              .then(() => {
+                should(poolManager['_pool'].availableResourceNum).equals(0);
+                return poolManager.getConnect();
+              })
+              .catch(error => {
+                should.notStrictEqual(error, conn);
+                should(error.message.includes('Request timeout')).equals(true);
+                should(poolManager['_pool'].availableResourceNum).equals(0);
+                should(poolManager['_pool'].poolSize).equals(5);
+                should(poolManager['_pool'].requestList.length).equals(1);
+                should(poolManager['_pool'].requestList[0].state).exactly(RequestState.REJECTED);
+              });
+          });
+      });
+      it('#connection can be released after getConnection is done, even it was released before.', function () {
+        return poolManager.getConnect()
+          .then(() => poolManager.getConnect())
+          .then(() => poolManager.getConnect())
+          .then(() => poolManager.getConnect())
+          .then(() => poolManager.getConnect())
+          .then((connection) => {
+            return poolManager.release(connection)
+              .then(() => poolManager.getConnect())
+              .then((conn) => {
+                should(connection).exactly(conn);
+                return poolManager.release(conn);
+              })
+              .then(() => {
+                should(poolManager['_pool'].availableResourceNum).equals(1);
+                should(poolManager['_pool'].poolSize).equals(5);
+                should(poolManager['_pool'].requestList.length).equals(0);
+              });
+          });
+      });
+      it('#getConnection can get the connection successfully after the connection was released twice.', function () {
+        return poolManager.getConnect()
+          .then(() => poolManager.getConnect())
+          .then(() => poolManager.getConnect())
+          .then(() => poolManager.getConnect())
+          .then(() => poolManager.getConnect())
+          .then((connection) => {
+            return poolManager.release(connection)
+              .then(() => poolManager.getConnect())
+              .then((conn) => poolManager.release(conn))
+              .then(() => {
+                should(poolManager['_pool'].availableResourceNum).equals(1);
+                return poolManager.getConnect();
+              })
+              .then((conn) => {
+                should(poolManager['_pool'].availableResourceNum).equals(0);
+                should(conn).exactly(connection);
+              });
+          });
+      });
+    });
+
+    describe('#getConnection + destroy', function () {
+      beforeEach(function () {
+        poolManager = new PoolManager(params, opts);
+      });
+      it('#if no resource is available, getConnection can be successful after destroy, but acquired connection is a new one.', function () {
+        return poolManager.getConnect()
+          .then(() => poolManager.getConnect())
+          .then(() => poolManager.getConnect())
+          .then(() => poolManager.getConnect())
+          .then(() => poolManager.getConnect())
+          .then((conn1) => {
+            // failed for the sixth request
+            should(poolManager['_pool'].availableResourceNum).equals(0);
+            return poolManager.destroy(conn1)
+              .then(() => poolManager.getConnect())
+              .then((conn2) => {
+                should(poolManager['_pool'].availableResourceNum).equals(0);
+                should.notStrictEqual(conn1, conn2);
+              });
+          });
+      });
+    });
+
+    describe('#release + destroy', function () {
+      beforeEach(function () {
+        poolManager = new PoolManager(params, opts);
+      });
+      it('#destoried connection can not be added back to queue (release).', function () {
+        return poolManager.getConnect()
+          .then((conn) =>
+            poolManager.destroy(conn)
+              .then(() => poolManager.release(conn))
+              .catch((err) => {
+                should(err.message.includes('Connection is not part of this pool')).equals(true);
+              }));
+      });
+
+      it('#released connection can not destroyed.', function () {
+        return poolManager.getConnect()
+          .then((conn) =>
+            poolManager.release(conn)
+              .then(() => poolManager.destroy(conn))
+              .then(() => {
+                should(poolManager['_pool'].getResourceFromConnectionInAll(conn)).equals(null);
+              }));
       });
     });
   });
