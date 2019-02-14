@@ -48,7 +48,7 @@ describe('PoolManager', function () {
 
   describe('#eventEmitter', function () {
     it('#should Util.eventEmitter.', function () {
-      should(poolManager.eventEmitter).exactly(Utils.eventEmitter);
+      should(PoolManager.eventEmitter).exactly(Utils.eventEmitter);
     });
   });
 });
