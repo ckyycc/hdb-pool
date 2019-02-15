@@ -154,26 +154,23 @@ describe('#Acceptance-PoolManager', function () {
       it('#call release should return the connection to pool.', function () {
         return poolManager.getConnect().then(conn => {
           const availableResNum = poolManager['_pool'].availableResourceNum;
-          return poolManager.release(conn).then(() => {
-            should(poolManager['_pool'].availableResourceNum).equals(availableResNum + 1);
-          });
+          return poolManager.release(conn)
+            .then(() => should(poolManager['_pool'].availableResourceNum).equals(availableResNum + 1));
         });
       });
       it('#call release should not change the pool size.', function () {
         return poolManager.getConnect().then(conn => {
           const poolResNum = poolManager['_pool'].poolSize;
-          return poolManager.release(conn).then(() => {
-            should(poolManager['_pool'].poolSize).equals(poolResNum);
-          });
+          return poolManager.release(conn)
+            .then(() => should(poolManager['_pool'].poolSize).equals(poolResNum));
         });
       });
       it('#call release should set the state of the connection resource to idle.', function () {
         return poolManager.getConnect().then(conn => {
           const resource = poolManager['_pool'].getResourceFromConnectionInAll(conn);
           should(resource.state).equals(ResourceState.ALLOCATED);
-          return poolManager.release(conn).then(() => {
-            should(resource.state).equals(ResourceState.IDLE);
-          });
+          return poolManager.release(conn)
+            .then(() => should(resource.state).equals(ResourceState.IDLE));
         });
       });
     });
@@ -193,9 +190,8 @@ describe('#Acceptance-PoolManager', function () {
       it('#call destroy should destroy the connection from pool.', function () {
         return poolManager.getConnect().then(conn => {
           should(poolManager['_pool'].getResourceFromConnectionInAll(conn) == null).equals(false);
-          return poolManager.destroy(conn).then(() => {
-            should(poolManager['_pool'].getResourceFromConnectionInAll(conn) == null).equals(true);
-          });
+          return poolManager.destroy(conn)
+            .then(() => should(poolManager['_pool'].getResourceFromConnectionInAll(conn) == null).equals(true));
         });
       });
       it('#poolsize should -1 after destroy if pool size > minimum.', function () {
@@ -204,17 +200,15 @@ describe('#Acceptance-PoolManager', function () {
           .then(() => poolManager.getConnect())
           .then(conn => {
             const poolSize = poolManager['_pool'].poolSize;
-            return poolManager.destroy(conn).then(() => {
-              should(poolManager['_pool'].poolSize).equals(poolSize - 1);
-            });
+            return poolManager.destroy(conn)
+              .then(() => should(poolManager['_pool'].poolSize).equals(poolSize - 1));
           });
       });
       it('#poolsize should = minimum after destroy if pool size = minimum.', function () {
         return poolManager.getConnect().then(conn => {
           const poolSize = poolManager['_pool'].poolSize;
-          return poolManager.destroy(conn).then(() => {
-            should(poolManager['_pool'].poolSize).equals(poolSize);
-          });
+          return poolManager.destroy(conn)
+            .then(() => should(poolManager['_pool'].poolSize).equals(poolSize));
         });
       });
     });
@@ -345,22 +339,16 @@ describe('#Acceptance-PoolManager', function () {
       });
       it('#destoried connection can not be added back to queue (release).', function () {
         return poolManager.getConnect()
-          .then((conn) =>
-            poolManager.destroy(conn)
-              .then(() => poolManager.release(conn))
-              .catch((err) => {
-                should(err.message.includes('Connection is not part of this pool')).equals(true);
-              }));
+          .then((conn) => poolManager.destroy(conn)
+            .then(() => poolManager.release(conn))
+            .catch((err) => should(err.message.includes('Connection is not part of this pool')).equals(true)));
       });
 
       it('#released connection can not destroyed.', function () {
         return poolManager.getConnect()
-          .then((conn) =>
-            poolManager.release(conn)
-              .then(() => poolManager.destroy(conn))
-              .then(() => {
-                should(poolManager['_pool'].getResourceFromConnectionInAll(conn)).equals(null);
-              }));
+          .then((conn) => poolManager.release(conn)
+            .then(() => poolManager.destroy(conn))
+            .then(() => should(poolManager['_pool'].getResourceFromConnectionInAll(conn)).equals(null)));
       });
     });
   });
