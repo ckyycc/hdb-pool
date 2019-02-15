@@ -9,6 +9,8 @@ const should = require('should');
 const Pool = require('../lib/Pool');
 const TaskType = require('../lib/types/TaskType');
 const Resource = require('../lib/Resource');
+const Request = require('../lib/Request');
+const Factory = require('../lib/Factory');
 
 describe('PoolOperator', function () {
   let operator, stub1, stub2, stub3, spy;
@@ -57,6 +59,13 @@ describe('PoolOperator', function () {
       sinon.assert.calledWith(stub1, task.resource);
     });
 
+    it('#should call _clearPoolResources with task.resource if task type is CLEAN_POOL.', function () {
+      const task = {taskType: TaskType.CLEAN_POOL};
+      stub1 = Stub.getStubForObjectWithResolvedPromise(operator, '_clearPoolResources');
+      operator.work(task).catch(() => '');
+      sinon.assert.calledOnce(stub1);
+    });
+
     it('#should return null if task type is unknown.', function () {
       const task = {taskType: 'TEST_TASK_TYPE', resource: Symbol('TEST_OPERATOR')};
       should(operator.work(task)).exactly(null);
@@ -75,7 +84,6 @@ describe('PoolOperator', function () {
     });
 
     it('#should not call createPoolResource if (min == poolSize).', function () {
-
       stub1 = Stub.getStubForObjectWithResolvedPromise(operator, 'createPoolResource');
       operator.pool.options.min = 2;
       operator.pool.options.max = 5;
@@ -227,6 +235,56 @@ describe('PoolOperator', function () {
 
       return operator['_checkIdleTimeout']().then(() => {
         sinon.assert.notCalled(spy);
+      });
+    });
+  });
+
+  describe('#_clearPoolResources', function () {
+    it('#should destroy for all the connection in resources.', function () {
+      const connection = {};
+      connection.close = (cb) => cb();
+      const resource = new Resource(connection);
+
+      operator.pool.poolResources.push(resource);
+      operator.pool.poolResources.push(resource);
+      stub1 = Stub.getStubForObjectWithResolvedPromise(Factory, 'destroy');
+
+      return operator['_clearPoolResources']().then(() => {
+        sinon.assert.calledWith(stub1, connection);
+        sinon.assert.calledTwice(stub1);
+      });
+    });
+
+    it('#should invalid all the resources.', function () {
+      const connection = {};
+      connection.close = (cb) => cb();
+      const resource = new Resource(connection);
+      operator.pool.poolResources.push(resource);
+      operator.pool.poolResources.push(resource);
+      spy = sinon.spy(resource, 'invalid');
+      return operator['_clearPoolResources']().then(() => {
+        sinon.assert.calledTwice(spy);
+      });
+    });
+
+    it('#should call reject for all the requests in the requests list.', function () {
+      const request = new Request();
+
+      operator.pool.requestList.push(request);
+      operator.pool.requestList.push(request);
+      stub1 = Stub.getStubForObjectWithResolvedPromise(request, 'reject');
+      return operator['_clearPoolResources']().then(() => sinon.assert.calledTwice(stub1));
+    });
+
+    it('#should truncate all resources.', function () {
+      const resource = Symbol('TEST_CLEAR');
+      operator.pool.requestList.push(resource);
+      operator.pool.poolResources.push(resource);
+      operator.pool.availableResourceList.push(resource);
+      return operator['_clearPoolResources']().then(() => {
+        should(operator.pool.requestList.length).equals(0);
+        should(operator.pool.poolResources.length).equals(0);
+        should(operator.pool.availableResourceList.length).equals(0);
       });
     });
   });

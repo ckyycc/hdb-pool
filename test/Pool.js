@@ -101,7 +101,16 @@ describe('Pool', function () {
       should(pool.placeholderNum).equals(1);
     });
   });
-
+  describe('#poolResources', function () {
+    it('should return all resources', function () {
+      should(pool.poolResources).exactly(pool['_allResources']);
+    });
+  });
+  describe('#availableResourceList', function () {
+    it('should return availableResourceList', function () {
+      should(pool.availableResourceList).exactly(pool['_availableResources']);
+    });
+  });
   describe('#dequeueFromAvailableResources', function () {
     it('should dequeue and return the first item from available list', function () {
       should(pool.dequeueFromAvailableResources()).exactly(undefined);
@@ -408,9 +417,13 @@ describe('Pool', function () {
 
   describe('#clear', function () {
     it('#should truncate all resources.', function () {
-      pool['_requestList'].push({});
-      pool['_allResources'].push({});
-      pool['_availableResources'].push({});
+      pool['_requestList'].length = 0;
+      pool['_allResources'].length = 0;
+      pool['_availableResources'].length = 0;
+      const resource = Symbol('TEST_CLEAR');
+      pool['_requestList'].push(resource);
+      pool['_allResources'].push(resource);
+      pool['_availableResources'].push(resource);
       return pool.clear().then(() => {
         should(pool['_requestList'].length).equals(0);
         should(pool['_allResources'].length).equals(0);

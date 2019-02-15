@@ -4,6 +4,10 @@ const StubHANAClient = require('./utils/StubHANAClient');
 const should = require('should');
 const ResourceState = require('../lib/types/ResourceState');
 const RequestState = require('../lib/types/RequestState');
+const Factory = require('../lib/Factory');
+const Stub = require('./utils/Stub');
+const sinon = require('sinon');
+
 const params = {
   HOST: 'fakeServer',
   PORT: '30015',
@@ -349,6 +353,25 @@ describe('#Acceptance-PoolManager', function () {
           .then((conn) => poolManager.release(conn)
             .then(() => poolManager.destroy(conn))
             .then(() => should(poolManager['_pool'].getResourceFromConnectionInAll(conn)).equals(null)));
+      });
+    });
+
+    describe('#clear + getConnection', function () {
+      beforeEach(function () {
+        poolManager = new PoolManager(params, opts);
+      });
+      it('#clear should destroy everything, including the acquired connection.', function () {
+        return poolManager.getConnect()
+          .then((conn) => {
+            const stub1 = Stub.getStubForObjectWithResolvedPromise(Factory, 'destroy');
+            return poolManager.clear()
+              .then(() => {
+                sinon.assert.calledWith(stub1, conn);
+                should(poolManager['_pool'].poolSize).equals(0);
+                should(poolManager['_pool'].getResourceFromConnectionInAll(conn)).equals(null);
+                Stub.restore(stub1);
+              });
+          });
       });
     });
   });
