@@ -56,8 +56,7 @@ describe('RequestOperator', function () {
       stub3 = Stub.getStubForObjectWithResolvedPromise(request, 'reject');
       stub4 = Stub.getStubForObjectWithResolvedPromise(operator, '_dispatchPooledConnections');
 
-      operator['_handleNewRequest'](request).catch(() => '');
-      sinon.assert.calledOnce(stub1);
+      operator['_handleNewRequest'](request).catch(() => '').then(() => sinon.assert.calledOnce(stub1));
     });
 
     it('#should call removeRequestFromList first then request.reject if parameter(request) ' +
@@ -76,7 +75,7 @@ describe('RequestOperator', function () {
       });
     });
 
-    it('#should call _dispatchPooledConnections at the end if parameter(request)' +
+    it('#should not call _dispatchPooledConnections at the end if parameter(request)' +
       'is not null/undefined, maxWaitingRequests > 0 and pool.requestList.length > maxWaitingRequests, .', function () {
       const request = new Request(1);
       request.promise.catch(() => '');
@@ -89,7 +88,7 @@ describe('RequestOperator', function () {
       return operator['_handleNewRequest'](request).then(() => {
         should(stub2.calledAfter(stub1)).equals(true);
         should(stub3.calledAfter(stub2)).equals(true);
-        should(stub4.calledAfter(stub3)).equals(true);
+        sinon.assert.notCalled(stub4);
       });
     });
 

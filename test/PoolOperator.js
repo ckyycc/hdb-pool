@@ -66,6 +66,13 @@ describe('PoolOperator', function () {
       sinon.assert.calledOnce(stub1);
     });
 
+    it('#should call _initializePool with task.resource if task type is INITIALIZE_POOL.', function () {
+      const task = {taskType: TaskType.INITIALIZE_POOL};
+      stub1 = Stub.getStubForObjectWithResolvedPromise(operator, '_initializePool');
+      operator.work(task).catch(() => '');
+      sinon.assert.calledOnce(stub1);
+    });
+
     it('#should return null if task type is unknown.', function () {
       const task = {taskType: 'TEST_TASK_TYPE', resource: Symbol('TEST_OPERATOR')};
       should(operator.work(task)).exactly(null);

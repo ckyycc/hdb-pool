@@ -41,10 +41,12 @@ describe('#Acceptance-PoolManager', function () {
     });
 
     describe('#new', function () {
-      it('#Shoud have minimum resources being created during creation', function () {
+      it('#Shoud have minimum resources being created after initialization', function () {
         const poolSize = 3;
         poolManager = new PoolManager(params, {min: poolSize});
-        should(poolManager['_pool'].poolSize).equals(poolSize);
+        poolManager['_pool'].initialize().then(() => {
+          should(poolManager['_pool'].poolSize).equals(poolSize);
+        });
       });
       it('#Shoud not have any resource in available list during creation', function () {
         const poolSize = 3;
@@ -348,7 +350,7 @@ describe('#Acceptance-PoolManager', function () {
             .catch((err) => should(err.message.includes('Connection is not part of this pool')).equals(true)));
       });
 
-      it('#released connection can not destroyed.', function () {
+      it('#released connection can be destroyed.', function () {
         return poolManager.getConnect()
           .then((conn) => poolManager.release(conn)
             .then(() => poolManager.destroy(conn))
@@ -370,6 +372,17 @@ describe('#Acceptance-PoolManager', function () {
                 should(poolManager['_pool'].poolSize).equals(0);
                 should(poolManager['_pool'].getResourceFromConnectionInAll(conn)).equals(null);
                 Stub.restore(stub1);
+              });
+          });
+      });
+
+      it('#getConnection can acquire new connection even after clear.', function () {
+        return poolManager.clear()
+          .then(() => {
+            poolManager.getConnect()
+              .then(conn => {
+                should(conn == null).equals(false);
+                should(poolManager['_pool'].poolSize).equals(1);
               });
           });
       });

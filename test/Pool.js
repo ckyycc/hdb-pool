@@ -8,6 +8,8 @@ const Resource = require('../lib/Resource');
 const RequestState = require('../lib/types/RequestState');
 const ResourceState = require('../lib/types/ResourceState');
 const Stub = require('./utils/Stub');
+const TaskType = require('../lib/types/TaskType');
+const Task = require('../lib/Task');
 
 describe('Pool', function () {
   let pool, stub, spy, spy2;
@@ -436,7 +438,30 @@ describe('Pool', function () {
       return pool.clear({}).then(() => sinon.assert.calledOnce(spy));
     });
   });
-
+  describe('#initialize', function () {
+    it('#should return rejected promise if pool already initialized.', function () {
+      pool['_initializeFlag'] = true;
+      return pool.initialize().catch(err => should(err.message.includes('has already been initialized')).equals(true));
+    });
+    it('#should trigger initialize task if pool has not been initialized.', function () {
+      pool['_initializeFlag'] = false;
+      stub = Stub.getStubForObjectWithResolvedPromise(pool, '_notifyAllOperators');
+      return pool.initialize({}).then(() => sinon.assert.calledWith(stub, new Task(TaskType.INITIALIZE_POOL)));
+    });
+    it('#should set initialize flag to true after initialization is done if pool has not been initialized.', function () {
+      pool['_initializeFlag'] = false;
+      stub = Stub.getStubForObjectWithResolvedPromise(pool, '_notifyAllOperators');
+      return pool.initialize({}).then(() => should(pool['_initializeFlag']).equals(true));
+    });
+  });
+  describe('#isPoolInitialized', function () {
+    it('#should return value of _initializeFlag.', function () {
+      pool['_initializeFlag'] = true;
+      should(pool.isPoolInitialized()).equals(pool['_initializeFlag']);
+      pool['_initializeFlag'] = false;
+      should(pool.isPoolInitialized()).equals(pool['_initializeFlag']);
+    });
+  });
   describe('#_notifyAllOperators', function () {
     let stubList;
     beforeEach(() => {

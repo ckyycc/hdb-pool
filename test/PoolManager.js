@@ -15,9 +15,18 @@ describe('PoolManager', function () {
     Stub.restore(stub);
   });
   describe('#getConnect', function () {
-    it('#should call addRequestToRequestList once.', function () {
+    it('#should call addRequestToRequestList once if pool is initialized.', function () {
       const poolManager = new PoolManager({}, {acquireTimeout: 1});
+      poolManager['_pool']['_initializeFlag'] = true;
       stub = Stub.getStubForObjectWithResolvedPromise(poolManager['_pool'], 'addRequestToRequestList');
+      poolManager.getConnect().catch(() => '');
+      sinon.assert.calledOnce(stub);
+    });
+
+    it('#should call initialize once if pool is not initialized.', function () {
+      const poolManager = new PoolManager({}, {acquireTimeout: 1});
+      poolManager['_pool']['_initializeFlag'] = false;
+      stub = Stub.getStubForObjectWithResolvedPromise(poolManager['_pool'], 'initialize');
       poolManager.getConnect().catch(() => '');
       sinon.assert.calledOnce(stub);
     });

@@ -38,7 +38,8 @@ describe('Operator', function () {
     });
 
     it('#should return with empty promise if no room left, addResourceToAll should not be called', function () {
-      operator = new Operator(new Pool({}, {max: 0}));
+      operator = new Operator(new Pool({}, {max: 1}));
+      operator.pool.poolResources.push({});
       stub1 = Stub.getStubForObjectWithResolvedPromise(operator.pool, 'addResourceToAll');
       return operator.createPoolResource().then((msg) => {
         should(msg).equals(undefined);
