@@ -447,7 +447,7 @@ describe('#Acceptance-PoolManager', function () {
         }
       }
 
-      it('#min = 10, max = 500, loop = 500', function () {
+      it('#loop less than max: min = 10, max = 500, loop = 250', function () {
         const maxSize = 500;
         const loop = 500;
         poolManager = new PoolManager(params, {min: 10, max: maxSize});
@@ -470,7 +470,30 @@ describe('#Acceptance-PoolManager', function () {
           });
       });
 
-      it('#min = 10, max = 500, loop = 1000', function () {
+      it('#loop equals max: min = 10, max = 500, loop = 500', function () {
+        const maxSize = 500;
+        const loop = 500;
+        poolManager = new PoolManager(params, {min: 10, max: maxSize});
+
+        const data = {};
+        data.validNum = 0;
+        data.destroyNum = 0;
+        data.releaseNum = 0;
+        data.promiseArray = [];
+        data.connections = new Array(maxSize);
+
+        genPromiseArray(data, loop);
+
+        return Promise.all(data.promiseArray)
+          .then(() => {
+            should(poolManager['_pool'].poolSize).equals(data.validNum + poolManager['_pool'].availableResourceNum);
+            // the number which acquired from available list
+            const fromAvailableList = data.releaseNum - poolManager['_pool'].availableResourceNum;
+            should(data.destroyNum).equals(loop - (data.validNum + poolManager['_pool'].availableResourceNum + (fromAvailableList)));
+          });
+      });
+
+      it('#loop bigger than max: min = 10, max = 500, loop = 1000', function () {
         const maxSize = 500;
         const loop = 1000;
         poolManager = new PoolManager(params, {min: 10, max: maxSize});
