@@ -58,6 +58,22 @@ describe('#Acceptance-PoolManager', function () {
       });
     });
 
+    describe('options', function () {
+      it('#request failed if the waiting request num >= maxWaitingRequests', function () {
+        const promiseArray = [];
+        const num = poolManager['_pool'].options.maxWaitingRequests + poolManager['_pool'].options.max;
+        // the last one exceed the maxWaitingRequests
+        for (let i = 0; i <= num; i++) {
+          promiseArray.push(poolManager.getConnection());
+        }
+
+        return Promise.all(promiseArray)
+          .catch(error => {
+            should(error.message.includes('Max waiting requests count exceeded')).equals(true);
+          });
+      });
+    });
+
     describe('#getConnection', function () {
       it('#call getConnection once should get one connection from pool (two in total).', function () {
         return poolManager.getConnection().then(conn => {
