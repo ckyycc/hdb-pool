@@ -79,7 +79,7 @@ describe('PoolOperator', function () {
     });
   });
 
-  describe('#ensureMinPoolResources', function () {
+  describe('#_ensureMinPoolResources', function () {
     it('#should call createPoolResource 3 times if min = 5 and  poolSize = 2 (min > poolSize).', function () {
       stub1 = Stub.getStubForObjectWithResolvedPromise(operator, 'createPoolResource');
       operator.pool.options.min = 5;
@@ -111,7 +111,7 @@ describe('PoolOperator', function () {
     });
   });
 
-  describe('#returnConnectionToPool', function () {
+  describe('#_returnConnectionToPool', function () {
     it('#should add resource to available if resource can be found in the pool.', function () {
       const resource = Symbol('TEST_RETURN_CONNECTION_TO_POOL');
       stub1 = Stub.getStubForOperatorWithObject(operator.pool, 'getResourceFromConnectionInAll', resource);
@@ -133,7 +133,7 @@ describe('PoolOperator', function () {
     });
   });
 
-  describe('#destroyConnection', function () {
+  describe('#_destroyConnection', function () {
     it('#should try to destroy the connection if resource can be found in the pool.', function () {
       const resource = Symbol('TEST_RETURN_CONNECTION_TO_POOL');
       stub1 = Stub.getStubForOperatorWithObject(operator.pool, 'getResourceFromConnectionInAll', resource);
@@ -174,7 +174,7 @@ describe('PoolOperator', function () {
     });
   });
 
-  describe('#checkIdleTimeout', function () {
+  describe('#_checkIdleTimeout', function () {
     it('#should try to destroy all (3) the resources from the pool (total is 5) if idle timeout.', function () {
       const timeout = operator.pool.options.idleTimeout + 300000;
 
