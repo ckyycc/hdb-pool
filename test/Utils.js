@@ -3,7 +3,7 @@
 const should = require('should');
 const Utils = require('../lib/Utils');
 const sinon = require('sinon');
-
+const eventType = require('../lib/types/EventType');
 describe('Utils', function () {
   describe('#getPoolOptions', function () {
     it('should get default options if parameter is empty', function () {
@@ -71,6 +71,11 @@ describe('Utils', function () {
       should(options.debug).exactly(false);
     });
 
+    it('debug should be set to false if the input is empty', function () {
+      const options = Utils.getPoolOptions({});
+      should(options.debug).exactly(false);
+    });
+
     it('debug should be set to true if the input is either a boolean true or a string "true"', function () {
       let options = Utils.getPoolOptions({debug: true});
       should(options.debug).exactly(true);
@@ -85,12 +90,60 @@ describe('Utils', function () {
     });
   });
   describe('#emitMessage', function () {
-    it('should invoke the event', function () {
+    it('for Non-DEBUG event, should invoke the event if debug flag is not set', function () {
       const spy = sinon.spy();
       const eventEmitter = Utils.eventEmitter;
-      const event = 'testEvent';
+      const event = eventType.ERROR;
       eventEmitter.on(event, spy);
       Utils.emitMessage(event, 'test1');
+      sinon.assert.calledOnce(spy);
+      sinon.assert.calledWith(spy, 'test1');
+    });
+
+    it('for Non-DEBUG event, should invoke the event if debug flag is false', function () {
+      const spy = sinon.spy();
+      const eventEmitter = Utils.eventEmitter;
+      const event = eventType.ERROR;
+      eventEmitter.on(event, spy);
+      Utils.emitMessage(event, 'test1', false);
+      sinon.assert.calledOnce(spy);
+      sinon.assert.calledWith(spy, 'test1');
+    });
+
+    it('for Non-DEBUG event, should invoke the event if debug flag is true', function () {
+      const spy = sinon.spy();
+      const eventEmitter = Utils.eventEmitter;
+      const event = eventType.ERROR;
+      eventEmitter.on(event, spy);
+      Utils.emitMessage(event, 'test1', true);
+      sinon.assert.calledOnce(spy);
+      sinon.assert.calledWith(spy, 'test1');
+    });
+
+    it('for DEBUG event, should not invoke the event if debug flag is not set', function () {
+      const spy = sinon.spy();
+      const eventEmitter = Utils.eventEmitter;
+      const event = eventType.DEBUG;
+      eventEmitter.on(event, spy);
+      Utils.emitMessage(event, 'test1');
+      sinon.assert.notCalled(spy);
+    });
+
+    it('for DEBUG event, should not invoke the event if debug flag is false', function () {
+      const spy = sinon.spy();
+      const eventEmitter = Utils.eventEmitter;
+      const event = eventType.DEBUG;
+      eventEmitter.on(event, spy);
+      Utils.emitMessage(event, 'test1', false);
+      sinon.assert.notCalled(spy);
+    });
+
+    it('for DEBUG event, should invoke the event if debug flag is true', function () {
+      const spy = sinon.spy();
+      const eventEmitter = Utils.eventEmitter;
+      const event = eventType.DEBUG;
+      eventEmitter.on(event, spy);
+      Utils.emitMessage(event, 'test1', true);
       sinon.assert.calledOnce(spy);
       sinon.assert.calledWith(spy, 'test1');
     });
