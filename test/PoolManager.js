@@ -16,7 +16,7 @@ describe('PoolManager', function () {
   });
   describe('#getConnection', function () {
     it('#should call addRequestToRequestList once if pool is initialized.', function () {
-      const poolManager = new PoolManager({}, {acquireTimeout: 1});
+      const poolManager = new PoolManager({}, {requestTimeout: 1});
       poolManager['_pool']['_initializeFlag'] = true;
       stub = Stub.getStubForObjectWithResolvedPromise(poolManager['_pool'], 'addRequestToRequestList');
       poolManager.getConnection().catch(() => '');
@@ -24,7 +24,7 @@ describe('PoolManager', function () {
     });
 
     it('#should call initialize once if pool is not initialized.', function () {
-      const poolManager = new PoolManager({}, {acquireTimeout: 1});
+      const poolManager = new PoolManager({}, {requestTimeout: 1});
       poolManager['_pool']['_initializeFlag'] = false;
       stub = Stub.getStubForObjectWithResolvedPromise(poolManager['_pool'], 'initialize');
       poolManager.getConnection().catch(() => '');

@@ -20,7 +20,7 @@ const opts = {
   max: 5,
   maxWaitingRequests: 6,
   checkInterval: 50000,
-  acquireTimeout: 800
+  requestTimeout: 800
 };
 describe('#Acceptance-PoolManager', function () {
   let poolManager, connection, stub;

@@ -10,7 +10,7 @@ describe('Utils', function () {
       const DEFAULT_POOL_OPTIONS = {
         min: 3,
         max: 50,
-        acquireTimeout: 5000,
+        requestTimeout: 5000,
         maxWaitingRequests: 0,
         checkInterval: 0,
         idleTimeout: 30000,
@@ -46,9 +46,9 @@ describe('Utils', function () {
       should(options.max).exactly(1);
     });
 
-    it('acquireTimeout should be set to 0 if the input is not a number', function () {
-      const options = Utils.getPoolOptions({acquireTimeout: 'A'});
-      should(options.acquireTimeout).exactly(0);
+    it('requestTimeout should be set to 0 if the input is not a number', function () {
+      const options = Utils.getPoolOptions({requestTimeout: 'A'});
+      should(options.requestTimeout).exactly(0);
     });
 
     it('maxWaitingRequests should be set to 0 if the input is not a number', function () {
@@ -81,6 +81,21 @@ describe('Utils', function () {
       should(options.debug).exactly(true);
       options = Utils.getPoolOptions({debug: 'True'});
       should(options.debug).exactly(true);
+    });
+  });
+  describe('#getPoolParams', function () {
+    it('should return the parameters for HANA get connection', function () {
+      const params = {
+        hostName: 'test1',
+        port: '30015',
+        userName: 'tester',
+        password: 'testPWD'
+      };
+      const dbParams = Utils.getPoolParams(params);
+      should(dbParams.HOST).exactly(params.hostName);
+      should(dbParams.PORT).exactly(params.port);
+      should(dbParams.UID).exactly(params.userName);
+      should(dbParams.PWD).exactly(params.password);
     });
   });
   describe('#get eventEmitter', function () {
