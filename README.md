@@ -5,7 +5,7 @@ HANA Database Connection pool for Node.js, inspired by (and copied some ideals f
 
 This module depends on the new hana-client  ([documentation](https://help.sap.com/viewer/0eec0d68141541d1b07893a39944924e/2.0.03/en-US/58c18548dab04a438a0f9c44be82b6cd.html)).
 
-##Table of contents
+## Table of contents
 
 * [Install](#install)
 * [Getting started](#getting-started)
