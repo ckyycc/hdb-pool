@@ -1,11 +1,33 @@
 {
-  "name": "node-hdb-pool",
-  "version": "0.0.0",
+  "name": "node-hana-pool",
+  "version": "0.0.2",
   "scripts": {
     "start": "node ./bin/www",
     "test": "mocha"
   },
-  "dependencies": {
+  "private": false,
+  "author": {
+    "name": "Kuang Cheng",
+    "email": "chengkuang@gmail.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "sap",
+    "hana",
+    "hdb",
+    "in-memroy",
+    "connection",
+    "pool",
+    "pooling"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ckyycc/node-hana-pool"
+  },
+  "bugs": {
+    "url": "https://github.com/ckyycc/node-hana-pool/issues"
+  },
+  "peerDependencies": {
     "@sap/hana-client": "^2.3.123"
   },
   "devDependencies": {

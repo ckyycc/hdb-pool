@@ -20,7 +20,7 @@ This module depends on the new hana-client  ([documentation](https://help.sap.co
 
 ## Install
 ```bash
-npm install node-hdb-pool
+npm install node-hana-pool
 ```
 
 ## Getting started
@@ -30,7 +30,7 @@ This is an example how to use this module:
 
 ```js
 // import the module
-const Pool = require('node-hdb-pool');
+const Pool = require('node-hana-pool');
 
 // HANA connection info
 const dbParams = {
@@ -74,7 +74,7 @@ The pool constructor takes two arguments:
 - `options` : a dictionary containing the configuration for the `Pool`
 
 ```js
-const Pool = require('node-hdb-pool');
+const Pool = require('node-hana-pool');
 const pool = new Pool(dbParams, options);
 ```
 #### dbParams
