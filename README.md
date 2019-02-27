@@ -145,8 +145,8 @@ pool supports five types event:
 
 ## Run Tests
 ```bash
-    npm install
-    npm test
+npm install
+npm test
 ```
 
 ## License
