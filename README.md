@@ -1,10 +1,22 @@
 # HANA Database Connection Pool
 
 
-HANA Database Connection pool for Node.js, inspired (and copied some ideals) by: [Generic Pool](https://github.com/coopernurse/node-pool).
+HANA Database Connection pool for Node.js, inspired by (and copied some ideals from): [Generic Pool](https://github.com/coopernurse/node-pool).
 
 This module depends on the new hana-client  ([documentation](https://help.sap.com/viewer/0eec0d68141541d1b07893a39944924e/2.0.03/en-US/58c18548dab04a438a0f9c44be82b6cd.html)).
 
+##Table of contents
+
+* [Install](#install)
+* [Getting started](#getting-started)
+* [Creating a pool](#creating-a-pool)
+* [Getting a connection](#getting-a-connection)
+* [Returning a connection](#returning-a-connection)
+* [Destroying a connection](#destroying-a-connection)
+* [Clearing the pool](#clearing-the-pool)
+* [Receiving events from pool](#receiving-events-from-pool)
+* [Running tests](#running-tests)
+* [License](#license)
 
 ## Install
 ```bash
@@ -58,12 +70,12 @@ pool.getConnection()
 
 The pool constructor takes two arguments:
 
-- `dbParams`: a dictonary containing the HANA DB connection information.
-- `options` : a dictonary containing the configuration for the `Pool`
+- `dbParams`: a dictionary containing the HANA DB connection information.
+- `options` : a dictionary containing the configuration for the `Pool`
 
 ```js
 const Pool = require('node-hdb-pool');
-const pool = new Pool(config, options);
+const pool = new Pool(dbParams, options);
 ```
 #### dbParams
 
@@ -82,25 +94,27 @@ An <i>optional</i> dictionary with the any of the following properties:
 - `min`: minimum number of resources to keep in pool at any given time. (default=3)
 - `maxWaitingRequests`: maximum number of waiting requests allowed. (default=0, no limit)
 - `requestTimeout`: max milliseconds a `request` will wait for a resource before timing out. (default=5000)
-- `checkInterval`: How often to run resource timeout checks. (default=0, disabled)
-- `idleTimeout`: the minimum amount of time that an connection may sit idle in the pool before it is eligible for eviction due to idle time. (default=30000)
+- `checkInterval`: how often to run resource timeout checks. (default=0, disabled)
+- `idleTimeout`: the time of a connection staying idle in the pool that eligible for eviction. (default=30000)
 - `debug`: a flag for emitting those debug message. (default=false, disabled)
 
 ### Getting a connection
 
 ```js
-pool.getConnection().then(connection => {...});
+pool.getConnection()
+    .then(connection => {...})
+    .catch(err => {...});
 ```
 
 ### Returning a connection
 
 ```js
-pool.release(connection).then(() => {...});
+pool.release(connection)
+    .then(() => {...})
+    .catch(err => {...});
 ```
 
-This function is for when you want to return a connection to the pool.
-
-`connection` takes one required argument:
+Returning a connection to the pool, the `connection` takes one required argument:
 
 - `connection`: a previously 'borrowed' connection
 
@@ -109,12 +123,11 @@ This function returns a `Promise`. This promise will resolve once the `connectio
 ### Destroying a connection
 
 ```js
-pool.destroy(connection).then(() => {...});
+pool.destroy(connection)
+    .then(() => {...})
+    .catch(err => {...});
 ```
-
-This function is for when you want to return a connection to the pool but want it destroyed rather than being made available to other requests. E.g you may know the connection has timed out or crashed.
-
-`destroy` takes one required argument:
+Removing the connection from the pool and destroy connection itself as well, the `destroy` takes one required argument:
 
 - `connection`: a previously borrowed connection
 
@@ -122,12 +135,14 @@ This function returns a `Promise`. This promise will resolve once the `connectio
 
 ### Clearing the pool
 ```js
-pool.clear().then(() => {...});
+pool.clear()
+    .then(() => {...})
+    .catch(err => {...});
 ```
 
-This function clears the pool, destroys all the connections in the pool and all the pending requests. 
+This function clears the pool, removing/destroying all the connections and all the pending requests from the pool. 
 
-### Receiving the event from pool
+### Receiving events from pool
 
 ```js
 pool.eventEmitter.on('poolDebug', myEventHandler);
@@ -136,14 +151,14 @@ pool.eventEmitter.on('connectionCreateError', myEventHandlerCreateError);
 pool.eventEmitter.on('connectionValidationError', myEventHandlerValidateError);
 pool.eventEmitter.on('requestTimeout', myEventHandlerValidateError);
 ```
-pool supports five types event:
-- `poolDebug`: debug infomation of the pool, needs to be enabled by options.debug first.
-- `poolError`: error infomation of the pool.
+Pool supports 5 different types of events:
+- `poolDebug`: debug information of the pool, needs to be enabled by  [options.debug](#options) first.
+- `poolError`: error information of the pool.
 - `connectionCreateError`: connection creation error.
 - `connectionValidationError`: connection validation error.
 - `requestTimeout`: request timeout.
 
-## Run Tests
+## Running tests
 ```bash
 npm install
 npm test
