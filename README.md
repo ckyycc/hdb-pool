@@ -102,9 +102,13 @@ An <i>optional</i> dictionary with the any of the following properties:
 
 ```js
 pool.getConnection()
-    .then(connection => {...})
+    .then(conn => {...})
     .catch(err => {...});
 ```
+
+Getting a HANA `connection` from the pool, the `getConnecction` does not have any argument. 
+
+It returns a `Promise`. The promise will be resolved with a `connection` if the connection is available in the pool. And the promise will be rejected with an error if the pool is unable to give a connection(eg: timeout). 
 
 ### Returning a connection
 
@@ -116,7 +120,7 @@ pool.release(connection)
 
 Returning a connection to the pool, the `connection` takes one required argument:
 
-- `connection`: a previously 'borrowed' connection
+- `connection`: a 'borrowed' connection.
 
 This function returns a `Promise`. This promise will resolve once the `connection` is accepted by the pool, or reject if the pool is unable to accept the `connection` for any reason (e.g `connection` is not a resource that came from the pool). If you do not care the outcome it is safe to ignore this promise.
 
@@ -127,9 +131,9 @@ pool.destroy(connection)
     .then(() => {...})
     .catch(err => {...});
 ```
-Removing the connection from the pool and destroy connection itself as well, the `destroy` takes one required argument:
+Removing the connection from the pool and destroy the connection itself as well. The function takes one required argument:
 
-- `connection`: a previously borrowed connection
+- `connection`: a "borrowed" connection.
 
 This function returns a `Promise`. This promise will resolve once the `connection` is accepted by the pool, If you do not care the outcome it is safe to ignore this promise.
 
