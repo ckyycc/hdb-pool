@@ -1,7 +1,6 @@
 {
   "name": "node-hdb-pool",
   "version": "0.0.0",
-  "private": true,
   "scripts": {
     "start": "node ./bin/www",
     "test": "mocha"
