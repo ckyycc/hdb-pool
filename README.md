@@ -3,8 +3,8 @@
 
 HANA Database Connection pool for Node.js, inspired by (and copied some ideals from): [Generic Pool](https://github.com/coopernurse/node-pool).
 
-This module supports both the new [hana-client](https://help.sap.com/viewer/0eec0d68141541d1b07893a39944924e/2.0.03/en-US/58c18548dab04a438a0f9c44be82b6cd.html) and the [node-hdb](https://github.com/SAP/node-hdb).
-If both are exist, the new [hana-client](https://help.sap.com/viewer/0eec0d68141541d1b07893a39944924e/2.0.03/en-US/58c18548dab04a438a0f9c44be82b6cd.html) will be used.  
+This module supports both the [hana-client](https://help.sap.com/viewer/0eec0d68141541d1b07893a39944924e/2.0.03/en-US/58c18548dab04a438a0f9c44be82b6cd.html) and the [node-hdb](https://github.com/SAP/node-hdb).
+If both are existing, the [hana-client](https://help.sap.com/viewer/0eec0d68141541d1b07893a39944924e/2.0.03/en-US/58c18548dab04a438a0f9c44be82b6cd.html) will be used.  
 
 ## Table of contents
 
