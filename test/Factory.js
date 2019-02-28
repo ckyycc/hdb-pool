@@ -3,20 +3,21 @@
 const factory = require('../lib/Factory');
 const should = require('should');
 const StubHANAClient = require('./utils/StubHANAClient');
+const Utils = require('../lib/Utils');
 
 describe('Factory', function () {
   describe('#create', function () {
     it('should reject with error when failing', function () {
       const rejectMsg = 'error';
       const stub = StubHANAClient.getStubCreateConnectionFailed(rejectMsg);
-      return factory.create().catch((err) => {
+      return factory.create({}).catch((err) => {
         should(err).be.exactly(rejectMsg);
         StubHANAClient.restore(stub);
       });
     });
     it('should return promise with the created connection if no error', function () {
       const {connection, stub} = StubHANAClient.getStubCreateConnectionSucceedWithSingleConnection();
-      return factory.create().then((result) => {
+      return factory.create({}).then((result) => {
         should(result).be.exactly(connection);
         StubHANAClient.restore(stub);
       });
@@ -41,18 +42,33 @@ describe('Factory', function () {
   });
 
   describe('#validate', function () {
-    it('should reject with false when failing', function () {
-      const conn = {};
-      conn.state = function () {
-        return 'not connected';
-      };
-      return factory.validate(conn).catch((err) => should(err).be.exactly(false));
+    let stub;
+    afterEach(() => {
+      StubHANAClient.restore(stub);
     });
-    it('should return promise with true if no error', function () {
-      const conn = {};
-      conn.state = function () {
-        return 'connected';
-      };
+
+    it('should resolve with false when failing if the driver is coming from HANA client', function () {
+      const conn = {state: () => 'not connected'};
+      stub = StubHANAClient.getStubForOperatorWithObject(Utils, 'isHANAClient', true);
+      return factory.validate(conn).then((result) => should(result).be.exactly(false));
+    });
+
+    it('should resolve with false when failing if the driver is coming from node-hdb', function () {
+      const conn = {readyState: 'not connected'};
+      stub = StubHANAClient.getStubForOperatorWithObject(Utils, 'isHANAClient', false);
+      return factory.validate(conn).then((result) => should(result).be.exactly(false));
+    });
+
+    it('should return promise with true if no error and the driver is coming from HANA client', function () {
+      const conn = {state: () => 'connected'};
+      stub = StubHANAClient.getStubForOperatorWithObject(Utils, 'isHANAClient', true);
+      return factory.validate(conn).then((result) => should(result).be.exactly(true));
+    });
+
+    it('should return promise with true if no error and the driver is coming from node-hdb', function () {
+      const conn = {readyState: 'connected'};
+
+      stub = StubHANAClient.getStubForOperatorWithObject(Utils, 'isHANAClient', false);
       return factory.validate(conn).then((result) => should(result).be.exactly(true));
     });
   });

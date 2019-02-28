@@ -47,7 +47,7 @@ describe('#Acceptance-PoolManager', function () {
       it('#Shoud have minimum resources being created after initialization', function () {
         const poolSize = 3;
         poolManager = new PoolManager(params, {min: poolSize});
-        poolManager['_pool'].initialize().then(() => {
+        return poolManager['_pool'].initialize().then(() => {
           should(poolManager['_pool'].poolSize).equals(poolSize);
         });
       });

@@ -84,7 +84,7 @@ describe('Utils', function () {
     });
   });
   describe('#getPoolParams', function () {
-    it('should return the parameters for HANA get connection', function () {
+    it('should return the parameters for HANA get connection if the driver is HANA client', function () {
       const params = {
         hostName: 'test1',
         port: '30015',
@@ -96,6 +96,29 @@ describe('Utils', function () {
       should(dbParams.PORT).exactly(params.port);
       should(dbParams.UID).exactly(params.userName);
       should(dbParams.PWD).exactly(params.password);
+    });
+    it('should return the parameters for HANA get connection if the driver is node-hdb', function () {
+      const params = {
+        hostName: 'test1',
+        port: '30015',
+        userName: 'tester',
+        password: 'testPWD'
+      };
+      const dbParams = Utils.getPoolParams(params, false);
+      should(dbParams.host).exactly(params.hostName);
+      should(dbParams.port).exactly(params.port);
+      should(dbParams.user).exactly(params.userName);
+      should(dbParams.password).exactly(params.password);
+    });
+  });
+  describe('#isHANAClient', function () {
+    it('should return true if driver is coming from HANA Client', function () {
+      const hana = {fromNodeHDB: false};
+      should(Utils.isHANAClient(hana)).equals(true);
+    });
+    it('should return false if driver is coming from node-hdb', function () {
+      const hana = {fromNodeHDB: true};
+      should(Utils.isHANAClient(hana)).equals(false);
     });
   });
   describe('#get eventEmitter', function () {
