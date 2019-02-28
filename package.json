@@ -1,6 +1,6 @@
 {
   "name": "hdb-pool",
-  "description": "HANA connection pool",
+  "description": "HANA database connection pool for Node.js",
   "version": "0.0.0",
   "scripts": {
     "start": "node ./bin/www",
@@ -18,7 +18,10 @@
     "in-memroy",
     "connection",
     "pool",
-    "pooling"
+    "pooling",
+    "node.js",
+    "node",
+    "nodejs"
   ],
   "repository": {
     "type": "git",
