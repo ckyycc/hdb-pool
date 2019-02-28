@@ -1,5 +1,8 @@
 const Stub = require('./Stub');
-const hana = require('@sap/hana-client');
+const Utils = require('../../lib/Utils');
+const hana = Utils.getHanaClient();
+const isHANAClient = Utils.isHANAClient(hana);
+
 let id = 0;
 /**
  * Stub the HANA Client, create stub for createConnection
@@ -11,11 +14,19 @@ class StubHANAClient extends Stub {
    * @return {stub}
    */
   static getStubCreateConnectionFailed(errMessage) {
-    return this.getStub(hana, 'createConnection', () => {
-      const conn = {};
-      conn.connect = (parameter, cb) => cb(errMessage);
-      return conn;
-    });
+    if (isHANAClient) {
+      return this.getStub(hana, 'createConnection', () => {
+        const conn = {};
+        conn.connect = (parameter, cb) => cb(errMessage);
+        return conn;
+      });
+    } else {
+      return this.getStub(hana, 'createClient', () => {
+        const conn = {};
+        conn.connect = (cb) => cb(errMessage);
+        return conn;
+      });
+    }
   }
 
   /**
@@ -25,12 +36,20 @@ class StubHANAClient extends Stub {
    */
   static getStubCreateConnectionSucceedWithSingleConnection() {
     const connection = {PROP: Symbol('TEST_CONNECTION_CREATION')};
-    connection.state = () => 'connected';
-    connection.connect = (parameter, cb) => cb();
-    connection.close = (cb) => cb();
 
-    const stub = this.getStub(hana, 'createConnection', () => connection);
-    return {connection, stub};
+    if (isHANAClient) {
+      const stub = this.getStub(hana, 'createConnection', () => connection);
+      connection.state = () => 'connected';
+      connection.connect = (parameter, cb) => cb();
+      connection.close = (cb) => cb();
+      return {connection, stub};
+    } else {
+      const stub = this.getStub(hana, 'createClient', () => connection);
+      connection.readyState = () => 'connected';
+      connection.connect = (cb) => cb();
+      connection.close = (cb) => cb();
+      return {connection, stub};
+    }
   }
 
   /**
@@ -39,15 +58,27 @@ class StubHANAClient extends Stub {
    * @return {stub}
    */
   static getStucCreateConnectionSucceedWithNewConnection() {
-    return this.getStub(hana, 'createConnection', () => {
-      const connection = {};
-      connection.state = () => 'connected';
-      connection.connect = (parameter, cb) => cb();
-      connection.close = (cb) => cb();
-      connection.id = ++id;
-      connection.propertySymbol = Symbol('TEST_CONNECTION_CREATION');
-      return connection;
-    });
+    if (isHANAClient) {
+      return this.getStub(hana, 'createConnection', () => {
+        const connection = {};
+        connection.state = () => 'connected';
+        connection.connect = (parameter, cb) => cb();
+        connection.close = (cb) => cb();
+        connection.id = ++id;
+        connection.propertySymbol = Symbol('TEST_CONNECTION_CREATION');
+        return connection;
+      });
+    } else {
+      return this.getStub(hana, 'createClient', () => {
+        const connection = {};
+        connection.readyState = () => 'connected';
+        connection.connect = (cb) => cb();
+        connection.close = (cb) => cb();
+        connection.id = ++id;
+        connection.propertySymbol = Symbol('TEST_CONNECTION_CREATION');
+        return connection;
+      });
+    }
   }
 }
 exports = module.exports = StubHANAClient;

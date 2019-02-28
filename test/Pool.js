@@ -35,7 +35,7 @@ describe('Pool', function () {
     it('should return parameters', function () {
       const param = {userName: 1, password: 2};
       pool = new Pool(param);
-      should(pool.parameters).deepEqual(Utils.getPoolParams(param));
+      should(pool.parameters).equals(param);
     });
   });
 
