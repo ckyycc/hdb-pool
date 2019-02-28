@@ -1,6 +1,7 @@
 {
-  "name": "node-hana-pool",
-  "version": "0.0.2",
+  "name": "hdb-pool",
+  "description": "HANA connection pool",
+  "version": "0.0.0",
   "scripts": {
     "start": "node ./bin/www",
     "test": "mocha"
@@ -10,7 +11,6 @@
     "name": "Kuang Cheng",
     "email": "chengkuang@gmail.com"
   },
-  "license": "MIT",
   "keywords": [
     "sap",
     "hana",
@@ -22,11 +22,16 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/ckyycc/node-hana-pool"
+    "url": "https://github.com/ckyycc/hdb-pool"
   },
   "bugs": {
-    "url": "https://github.com/ckyycc/node-hana-pool/issues"
+    "url": "https://github.com/ckyycc/hdb-pool/issues"
   },
+  "main": "index.js",
+  "files": [
+    "/lib",
+    "/test"
+  ],
   "peerDependencies": {
     "@sap/hana-client": "^2.3.123"
   },
@@ -41,5 +46,9 @@
     "mocha": "^5.2.0",
     "should": "^13.2.3",
     "sinon": "^7.2.3"
-  }
+  },
+  "engines": {
+    "node": ">= 8"
+  },
+  "license": "MIT"
 }
