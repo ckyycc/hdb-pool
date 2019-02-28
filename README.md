@@ -15,12 +15,13 @@ This module depends on the new hana-client  ([documentation](https://help.sap.co
 * [Destroying a connection](#destroying-a-connection)
 * [Clearing the pool](#clearing-the-pool)
 * [Receiving events from pool](#receiving-events-from-pool)
+* [Getting status overview of pool](#getting-status-overview-of-pool)
 * [Running tests](#running-tests)
 * [License](#license)
 
 ## Install
 ```bash
-npm install node-hana-pool
+npm install hdb-pool
 ```
 
 ## Getting started
@@ -30,7 +31,7 @@ This is an example how to use this module:
 
 ```js
 // import the module
-const Pool = require('node-hana-pool');
+const Pool = require('hdb-pool');
 
 // HANA connection info
 const dbParams = {
@@ -47,7 +48,7 @@ const options = {
 };
 
 // create the pool
-const pool = new Pool(dbParams, options);
+const pool = Pool.createPool(dbParams, options);
 
 // execute some sample sql via the pool 
 pool.getConnection()
@@ -74,8 +75,8 @@ The pool constructor takes two arguments:
 - `options` : a dictionary containing the configuration for the `Pool`
 
 ```js
-const Pool = require('node-hana-pool');
-const pool = new Pool(dbParams, options);
+const Pool = require('hdb-pool');
+const pool = Pool.createPool(dbParams, options);
 ```
 #### dbParams
 
@@ -161,6 +162,12 @@ Pool supports 5 different types of events:
 - `connectionCreateError`: connection creation error.
 - `connectionValidationError`: connection validation error.
 - `requestTimeout`: request timeout.
+
+### Getting status overview of pool
+```js
+const overview = pool.getPoolStatusOverview();
+```
+This function will show the current status of the pool.
 
 ## Running tests
 ```bash
