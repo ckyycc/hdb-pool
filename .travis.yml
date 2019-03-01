@@ -1,0 +1,24 @@
+
+
+# Language
+language: node_js
+node_js:
+  - "node"
+
+# Branches to build
+branches:
+  only:
+    - master
+
+# Build
+script:
+  - npm install
+  - npm test
+
+# Notifications
+notifications:
+  email:
+    recipients:
+      - chengkuang@gmail.com
+    on_success: change
+    on_failure: change
