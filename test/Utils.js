@@ -118,7 +118,8 @@ describe('Utils', function () {
     beforeEach(() => {
       const _module = require('module');
       // stub = sinon.stub(_module, '_load');
-      stub = Stub.getStub(_module, '_load', () => {});
+      stub = Stub.getStub(_module, '_load', () => {
+      });
       // stub = sinon.stub(module, 'require');
       requireEx = new Error('ERROR');
       requireEx.code = 'MODULE_NOT_FOUND';
@@ -165,7 +166,16 @@ describe('Utils', function () {
       const hana = {fromNodeHDB: true};
       should(Utils.isHANAClient(hana)).equals(false);
     });
+    it('should throw an error if driver is empty', function () {
+      try {
+        Utils.isHANAClient(null);
+        should(true).equals(false); // should not reach here
+      } catch (err) {
+        should(err.message).equals('HANA Client can not be empty');
+      }
+    });
   });
+
   describe('#get eventEmitter', function () {
     it('should return the EventEmitter type object', function () {
       const jsonString = JSON.stringify(Utils.eventEmitter);
@@ -230,6 +240,35 @@ describe('Utils', function () {
       Utils.emitMessage(event, 'test1', true);
       sinon.assert.calledOnce(spy);
       sinon.assert.calledWith(spy, 'test1');
+    });
+  });
+
+  describe('#increaseResourceTimeoutNum', function () {
+    it('should do +1 for resourceTimeoutNum', function () {
+      const num = Utils.resourceTimeoutNum;
+      Utils.increaseResourceTimeoutNum();
+      should(num + 1).equals(Utils.resourceTimeoutNum);
+    });
+  });
+  describe('#increaseRequestTimeoutNum', function () {
+    it('should do +1 for requestTimeoutNum', function () {
+      const num = Utils.requestTimeoutNum;
+      Utils.increaseRequestTimeoutNum();
+      should(num + 1).equals(Utils.requestTimeoutNum);
+    });
+  });
+  describe('#increaseResolvedRequestNum', function () {
+    it('should do +1 for resolvedRequestNum', function () {
+      const num = Utils.resolvedRequestNum;
+      Utils.increaseResolvedRequestNum();
+      should(num + 1).equals(Utils.resolvedRequestNum);
+    });
+  });
+  describe('#increaseRejectedRequestNum', function () {
+    it('should do +1 for rejectedRequestNum', function () {
+      const num = Utils.rejectedRequestNum;
+      Utils.increaseRejectedRequestNum();
+      should(num + 1).equals(Utils.rejectedRequestNum);
     });
   });
 });

@@ -60,4 +60,23 @@ describe('PoolManager', function () {
       should(PoolManager.eventEmitter).exactly(Utils.eventEmitter);
     });
   });
+
+  describe('#getPoolStatusOverview', function () {
+    it('#should return pool status overview.', function () {
+      const overview = poolManager.getPoolStatusOverview();
+      should(overview.hasOwnProperty('pool')).equals(true);
+      should(overview.pool.hasOwnProperty('size')).equals(true);
+      should(overview.pool.hasOwnProperty('min')).equals(true);
+      should(overview.pool.hasOwnProperty('max')).equals(true);
+      should(overview.pool.hasOwnProperty('available')).equals(true);
+      should(overview.pool.hasOwnProperty('timeout')).equals(true);
+      should(overview.hasOwnProperty('request')).equals(true);
+      should(overview.request.hasOwnProperty('number')).equals(true);
+      should(overview.request.hasOwnProperty('pending')).equals(true);
+      should(overview.request.hasOwnProperty('max')).equals(true);
+      should(overview.request.hasOwnProperty('resolved')).equals(true);
+      should(overview.request.hasOwnProperty('rejected')).equals(true);
+      should(overview.request.hasOwnProperty('timeout')).equals(true);
+    });
+  });
 });

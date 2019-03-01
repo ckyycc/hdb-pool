@@ -1,3 +1,5 @@
+'use strict';
+
 const Pool = require('./lib/PoolManager');
 exports.Pool = Pool;
 exports.createPool = (dbParams, options) => new Pool(dbParams, options);
