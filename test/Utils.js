@@ -168,11 +168,7 @@ describe('Utils', function () {
   });
   describe('#get eventEmitter', function () {
     it('should return the EventEmitter type object', function () {
-      console.log(Utils.eventEmitter);
       const jsonString = JSON.stringify(Utils.eventEmitter);
-      console.log(jsonString);
-      // should(jsonString.includes('domain') && jsonString.includes('_events') && jsonString.includes('_eventsCount')).exactly(true);
-      should(jsonString.includes('domain')).equals(true);
       should(jsonString.includes('_events')).equals(true);
       should(jsonString.includes('_eventsCount')).equals(true);
     });
