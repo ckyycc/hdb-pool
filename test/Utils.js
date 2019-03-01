@@ -4,6 +4,8 @@ const should = require('should');
 const Utils = require('../lib/Utils');
 const sinon = require('sinon');
 const eventType = require('../lib/types/EventType');
+const Stub = require('./utils/Stub');
+
 describe('Utils', function () {
   describe('#getPoolOptions', function () {
     it('should get default options if parameter is empty', function () {
@@ -111,6 +113,49 @@ describe('Utils', function () {
       should(dbParams.password).exactly(params.password);
     });
   });
+  describe('#getHanaClient', function () {
+    let stub, requireEx;
+    beforeEach(() => {
+      const _module = require('module');
+      // stub = sinon.stub(_module, '_load');
+      stub = Stub.getStub(_module, '_load', () => {});
+      // stub = sinon.stub(module, 'require');
+      requireEx = new Error('ERROR');
+      requireEx.code = 'MODULE_NOT_FOUND';
+    });
+    afterEach(() => {
+      Stub.restore(stub);
+    });
+    it('should return client from hana-client if driver of HANA Client exists', function () {
+      stub.withArgs('@sap/hana-client').returns({});
+      stub.withArgs('hdb').throws(requireEx);
+      should(Utils.getHanaClient().fromNodeHDB).equals(undefined);
+    });
+
+    it('should return client from node-hdb if driver of node-hdb exists', function () {
+      stub.withArgs('@sap/hana-client').throws(requireEx);
+      stub.withArgs('hdb').returns({fromNodeHDB: true});
+      should(Utils.getHanaClient().fromNodeHDB).equals(true);
+    });
+
+    it('should return client from hana-client if both driver of HANA Client and node-hdb exists', function () {
+      stub.withArgs('@sap/hana-client').returns({});
+      stub.withArgs('hdb').returns({fromNodeHDB: true});
+      should(Utils.getHanaClient().fromNodeHDB).equals(undefined);
+    });
+
+    it('should throw exception if neither driver of HANA Client nor node-hdb exists', function () {
+      stub.withArgs('@sap/hana-client').throws(requireEx);
+      stub.withArgs('hdb').throws(requireEx);
+      try {
+        Utils.getHanaClient();
+        should(true).equals(false); // we should not reach here
+      } catch (err) {
+        should(err.code).equals('MODULE_NOT_FOUND');
+      }
+    });
+  });
+
   describe('#isHANAClient', function () {
     it('should return true if driver is coming from HANA Client', function () {
       const hana = {fromNodeHDB: false};
