@@ -1,7 +1,7 @@
 module.exports = {
     "extends": "standard",
     "parserOptions": {
-        "ecmaVersion": 6
+        "ecmaVersion": 2017
     },
     "rules": {
         'max-len': ["error", { "code": 140 }],
