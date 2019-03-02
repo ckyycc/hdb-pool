@@ -1,11 +1,12 @@
 'use strict';
+
+const sinon = require('sinon');
+const should = require('should');
+const TaskType = require('../lib/types/TaskType');
 const RequestOperator = require('../lib/RequestOperator');
 const Stub = require('./utils/Stub');
 const Request = require('../lib/Request');
-const sinon = require('sinon');
-const should = require('should');
 const Pool = require('../lib/Pool');
-const TaskType = require('../lib/types/TaskType');
 
 describe('RequestOperator', function () {
   let stub1, stub2, stub3, stub4, operator;
@@ -195,10 +196,33 @@ describe('RequestOperator', function () {
       });
     });
 
+    it('#should not call deliverPooledConnection if the resource from available list is empty and ' +
+      'requestList.length < availableResource Number after promises(createPoolResource) are finished.', function() {
+      operator.pool.requestList.length = 9;
+      operator.pool['_availableResources'].length = 99;
+      operator.pool['_allResources'].length = 0;
+      const creationPlaceHolder1 = Symbol('PlaceHolder4Creation');
+      const creationPlaceHolder2 = Symbol('PlaceHolder4Creation');
+
+      operator.pool['_allResources'].push(creationPlaceHolder1);
+      operator.pool['_allResources'].push(creationPlaceHolder2);
+
+      // room = options.max - _allResources.length
+      operator.pool.options.max = 5; // room is 3
+      // set the returning object empty
+      const connection = '';
+      stub1 = Stub.getStubForObjectWithResolvedPromise(operator, 'createPoolResource');
+      stub2 = Stub.getStubForOperatorWithObject(operator.pool, 'dequeueFromAvailableResources', connection);
+      stub3 = Stub.getStubForObjectWithResolvedPromise(operator, 'deliverPooledConnection');
+
+      return operator['_dispatchPooledConnections']().then(() => {
+        sinon.assert.notCalled(stub3);
+      });
+    });
+
     it('#should call deliverPooledConnection requestList.length times with the output of dequeueFromAvailableResources ' +
       'if requestList.length < availableResource Number after promises(createPoolResource) are finished.', function() {
-      const testTimes = 9;
-      operator.pool.requestList.length = testTimes;
+      operator.pool.requestList.length = 9;
       operator.pool['_availableResources'].length = 99;
       operator.pool['_allResources'].length = 0;
       const creationPlaceHolder1 = Symbol('PlaceHolder4Creation');

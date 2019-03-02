@@ -1,14 +1,15 @@
 'use strict';
 
 const should = require('should');
-const Utils = require('../lib/Utils');
 const sinon = require('sinon');
-const Pool = require('../lib/Pool');
-const Resource = require('../lib/Resource');
 const RequestState = require('../lib/types/RequestState');
 const ResourceState = require('../lib/types/ResourceState');
-const Stub = require('./utils/Stub');
 const TaskType = require('../lib/types/TaskType');
+const EventType = require('../lib/types/EventType');
+const Utils = require('../lib/Utils');
+const Pool = require('../lib/Pool');
+const Resource = require('../lib/Resource');
+const Stub = require('./utils/Stub');
 const Task = require('../lib/Task');
 
 describe('Pool', function () {
@@ -471,25 +472,37 @@ describe('Pool', function () {
     });
   });
 
-  // describe('#_checkConnectionIdleTimeout', function () {
-  //   const time = 500;
-  //   let clock;
-  //   before(function() {
-  //     clock = sinon.useFakeTimers();
-  //   });
-  //   after(function() {
-  //     clock.restore();
-  //   });
-  //   it('#shoud emit error if _notifyAllOperators failed', function () {
-  //     const errorMsg = 'Error_NotifyAllOperators';
-  //     stub = Stub.getStubForObjectWithRejectedPromise(pool, '_notifyAllOperators', errorMsg);
-  //     spy = sinon.spy(Utils, 'emitMessage');
-  //     pool['_checkConnectionIdleTimeout'](time);
-  //     clock.tick(500);
-  //     sinon.assert.calledOnce(spy);
-  //     // sinon.assert.calledWith(spy, EventType.ERROR);
-  //   });
-  // });
+  describe('#_checkConnectionIdleTimeout', function () {
+    const time = 500;
+    let clock;
+    beforeEach(function() {
+      clock = sinon.useFakeTimers();
+    });
+    afterEach(function() {
+      clock.restore();
+    });
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    it('#shoud emit error if _notifyAllOperators failed', async function () {
+      const errorMsg = 'Error_NotifyAllOperators';
+      stub = Stub.getStubForObjectWithRejectedPromise(pool, '_notifyAllOperators', errorMsg);
+      spy = sinon.spy(Utils, 'emitMessage');
+      pool['_checkConnectionIdleTimeout'](time);
+      clock.tick(time + 1);
+      clock.restore();
+      await sleep(150); // wait for emitMessage (is there any better solution?)
+      sinon.assert.calledOnce(spy);
+      sinon.assert.calledWith(spy, EventType.ERROR);
+    });
+    it('#should call _notifyAllOperators with a CHECK_IDLE_TIMEOUT type task', function () {
+      stub = Stub.getStubForObjectWithResolvedPromise(pool, '_notifyAllOperators');
+      pool['_checkConnectionIdleTimeout'](time);
+      clock.tick(time + 1);
+      sinon.assert.calledOnce(stub);
+      sinon.assert.calledWith(stub, new Task(TaskType.CHECK_IDLE_TIMEOUT));
+    });
+  });
 
   describe('#_notifyAllOperators', function () {
     let stubList;
@@ -532,6 +545,34 @@ describe('Pool', function () {
         .catch((err) => {
           should(err.message).equals('Something wrong, can not find any worker for task JUST_FOR_TEST');
         });
+    });
+  });
+
+  describe('#_stopCheckInterval', function () {
+    let clock;
+    before(function() {
+      clock = sinon.useFakeTimers();
+    });
+    after(function() {
+      clock.restore();
+    });
+
+    it('#should set _intervalId to undefined if _intervalId is not undefined', function () {
+      pool['_intervalId'] = 25;
+      pool['_stopCheckInterval']();
+      should(pool['_intervalId']).exactly(undefined);
+    });
+    it('#should call clearInterval with the interval Id if _intervalId is not undefined', function () {
+      pool['_intervalId'] = 25;
+      spy = sinon.spy(clock, 'clearInterval');
+      pool['_stopCheckInterval']();
+      sinon.assert.calledOnce(spy);
+    });
+    it('#should not call clearInterval if _intervalId is not undefined', function () {
+      pool['_intervalId'] = undefined;
+      spy = sinon.spy(clock, 'clearInterval');
+      pool['_stopCheckInterval']();
+      sinon.assert.notCalled(spy);
     });
   });
 });
