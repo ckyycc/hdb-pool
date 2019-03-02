@@ -304,7 +304,7 @@ describe('Pool', function () {
   describe('#addResourceToAvailable', function () {
     let resource;
     beforeEach(() => {
-      resource = new Resource();
+      resource = new Resource(undefined);
     });
     it('should add the resource to available resource list', function () {
       pool.addResourceToAvailable(resource).catch(() => '');
@@ -342,7 +342,7 @@ describe('Pool', function () {
   describe('#replacePlaceHolderWithConnectionFromAll', function () {
     let resource;
     beforeEach(() => {
-      resource = new Resource();
+      resource = new Resource(undefined);
     });
     it('should replace the placeholder with the provided resource from the pool', function () {
       const placeHolder = Symbol('PlaceHolder4Creation');
@@ -354,12 +354,20 @@ describe('Pool', function () {
       });
     });
 
-    it('#should not call _notifyAllOperators once', function () {
+    it('#should call _notifyAllOperators once', function () {
       const placeHolder = Symbol('PlaceHolder4Creation');
       pool['_allResources'].push(placeHolder);
       spy = sinon.spy(pool, '_notifyAllOperators');
       pool.replacePlaceHolderWithConnectionFromAll(placeHolder, resource).catch(() => '');
       sinon.assert.calledOnce(spy);
+    });
+
+    it('#should not call _notifyAllOperators if resource is a Symbol as well', function () {
+      const placeHolder = Symbol('PlaceHolder4Creation');
+      pool['_allResources'].push(placeHolder);
+      spy = sinon.spy(pool, '_notifyAllOperators');
+      pool.replacePlaceHolderWithConnectionFromAll(placeHolder, Symbol('PlaceHolder4Creation')).catch(() => '');
+      sinon.assert.notCalled(spy);
     });
 
     it('#should return rejected promise if the placeHolder cannot be matched', function () {
@@ -462,6 +470,27 @@ describe('Pool', function () {
       should(pool.isPoolInitialized()).equals(pool['_initializeFlag']);
     });
   });
+
+  // describe('#_checkConnectionIdleTimeout', function () {
+  //   const time = 500;
+  //   let clock;
+  //   before(function() {
+  //     clock = sinon.useFakeTimers();
+  //   });
+  //   after(function() {
+  //     clock.restore();
+  //   });
+  //   it('#shoud emit error if _notifyAllOperators failed', function () {
+  //     const errorMsg = 'Error_NotifyAllOperators';
+  //     stub = Stub.getStubForObjectWithRejectedPromise(pool, '_notifyAllOperators', errorMsg);
+  //     spy = sinon.spy(Utils, 'emitMessage');
+  //     pool['_checkConnectionIdleTimeout'](time);
+  //     clock.tick(500);
+  //     sinon.assert.calledOnce(spy);
+  //     // sinon.assert.calledWith(spy, EventType.ERROR);
+  //   });
+  // });
+
   describe('#_notifyAllOperators', function () {
     let stubList;
     beforeEach(() => {
@@ -478,14 +507,31 @@ describe('Pool', function () {
         should(str).equals(Stub.resolvedMessage);
       });
     });
-    it('#should reject if no taskFound.', function () {
+    // `Something wrong, can not find any worker for task ${task && task.taskType ? task.taskType : 'None'}`
+
+    it('#should reject if no taskFound (task is undefined).', function () {
       const rejectError = 'it was not supposed to succeed.';
       pool['_operators'].forEach((operator) => {
         stubList.push(Stub.getStubForOperatorWithObject(operator, 'work', null));
       });
       return pool['_notifyAllOperators']()
         .then(() => Promise.reject(rejectError))
-        .catch((err) => should.notStrictEqual(err, rejectError));
+        .catch((err) => {
+          should(err.message).equals('Something wrong, can not find any worker for task None');
+        });
+    });
+
+    it('#should reject if no taskFound (task is not undefined).', function () {
+      const rejectError = 'it was not supposed to succeed.';
+      pool['_operators'].forEach((operator) => {
+        stubList.push(Stub.getStubForOperatorWithObject(operator, 'work', null));
+      });
+      const Task = {taskType: 'JUST_FOR_TEST'};
+      return pool['_notifyAllOperators'](Task)
+        .then(() => Promise.reject(rejectError))
+        .catch((err) => {
+          should(err.message).equals('Something wrong, can not find any worker for task JUST_FOR_TEST');
+        });
     });
   });
 });

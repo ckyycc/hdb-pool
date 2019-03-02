@@ -175,6 +175,16 @@ describe('PoolOperator', function () {
   });
 
   describe('#_checkIdleTimeout', function () {
+    it('#should not touch the resource if it is not timeout', function () {
+      const resource1 = new Resource({});
+      resource1['_lastIdleTime'] = Date.now();
+      operator.pool['_availableResources'].push(resource1);
+      stub1 = Stub.getStubForObjectWithResolvedPromise(operator, 'destroy');
+      stub2 = Stub.getStubForObjectWithResolvedPromise(operator, '_ensureMinPoolResources');
+      return operator['_checkIdleTimeout']().then(() => {
+        sinon.assert.notCalled(stub1);
+      });
+    });
     it('#should try to destroy all (3) the resources from the pool (total is 5) if idle timeout.', function () {
       const timeout = operator.pool.options.idleTimeout + 300000;
 

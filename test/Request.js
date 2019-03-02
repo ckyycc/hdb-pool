@@ -158,6 +158,14 @@ describe('Request', function () {
       request['_setTimeout']('AA');
       sinon.assert.calledOnce(spy);
     });
+    it('#should not do anything if delay is not number and state is not in pending', function () {
+      const request = new Request(1);
+      request.promise.catch(() => '');
+      request['_state'] = RequestState.REJECTED;
+      spy = sinon.spy(request, 'reject');
+      request['_setTimeout']('AA');
+      sinon.assert.notCalled(spy);
+    });
     it('#should call reject is delay is less than 0', function () {
       const request = new Request(1);
       request.promise.catch(() => '');
