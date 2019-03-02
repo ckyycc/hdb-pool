@@ -4,8 +4,8 @@
 
 HANA Database Connection pool for Node.js, inspired by (and copied some ideals from): [Generic Pool](https://github.com/coopernurse/node-pool).
 
-This module supports both the [hana-client](https://help.sap.com/viewer/0eec0d68141541d1b07893a39944924e/2.0.03/en-US/58c18548dab04a438a0f9c44be82b6cd.html) and the [node-hdb](https://github.com/SAP/node-hdb).
-If both are existing, the [hana-client](https://help.sap.com/viewer/0eec0d68141541d1b07893a39944924e/2.0.03/en-US/58c18548dab04a438a0f9c44be82b6cd.html) will be chosen.  
+This module supports [hana-client](https://help.sap.com/viewer/0eec0d68141541d1b07893a39944924e/2.0.03/en-US/58c18548dab04a438a0f9c44be82b6cd.html) and [node-hdb](https://github.com/SAP/node-hdb).
+If both exist, the [hana-client](https://help.sap.com/viewer/0eec0d68141541d1b07893a39944924e/2.0.03/en-US/58c18548dab04a438a0f9c44be82b6cd.html) will be chosen.  
 
 ## Table of contents
 
@@ -153,11 +153,11 @@ This function clears the pool, removing/destroying all the connections and all t
 ### Receiving events from pool
 
 ```js
-pool.eventEmitter.on('poolDebug', myEventHandler);
-pool.eventEmitter.on('poolError', myEventHandlerError);
-pool.eventEmitter.on('connectionCreateError', myEventHandlerCreateError);
-pool.eventEmitter.on('connectionValidationError', myEventHandlerValidateError);
-pool.eventEmitter.on('requestTimeout', myEventHandlerValidateError);
+Pool.eventEmitter.on('poolDebug', myEventHandler);
+Pool.eventEmitter.on('poolError', myEventHandlerError);
+Pool.eventEmitter.on('connectionCreateError', myEventHandlerCreateError);
+Pool.eventEmitter.on('connectionValidationError', myEventHandlerValidateError);
+Pool.eventEmitter.on('requestTimeout', myEventHandlerValidateError);
 ```
 Pool supports 5 different types of events:
 - `poolDebug`: debug information of the pool, needs to be enabled by  [options.debug](#options) first.
