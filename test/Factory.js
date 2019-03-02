@@ -15,11 +15,82 @@ describe('Factory', function () {
         StubHANAClient.restore(stub);
       });
     });
-    it('should return promise with the created connection if no error', function () {
-      const {connection, stub} = StubHANAClient.getStubCreateConnectionSucceedWithSingleConnection();
+
+    it('should reject with error when failing (hana-client)', function () {
+      const rejectMsg = 'error occurs';
+      const stub = StubHANAClient.getStubForOperatorWithObject(Utils, 'isHANAClient', true);
+      const hana = Utils.getHanaClient();
+      const connection = {PROP: Symbol('TEST_CONNECTION_CREATION')};
+      connection.state = () => 'connected';
+      connection.connect = (parameter, cb) => cb(rejectMsg);
+      connection.close = (cb) => cb();
+      const original = hana.createConnection;
+      hana.createConnection = () => connection;
+
+      return factory.create({})
+        .then(() => {
+          should(true).equals(false); // should not be here
+        })
+        .catch((err) => {
+          should(err).be.exactly(rejectMsg);
+          StubHANAClient.restore(stub);
+          hana.createConnection = original;
+        });
+    });
+
+    it('should reject with error when failing  (node-hdb)', function () {
+      const rejectMsg = 'error occurs';
+      const stub = StubHANAClient.getStubForOperatorWithObject(Utils, 'isHANAClient', false);
+      const hana = Utils.getHanaClient();
+      const connection = {PROP: Symbol('TEST_CONNECTION_CREATION')};
+      connection.readyState = 'connected';
+      connection.connect = (cb) => cb(rejectMsg);
+      connection.close = (cb) => cb();
+      const original = hana.createClient;
+      hana.createClient = () => connection;
+
+      return factory.create({})
+        .then(() => {
+          should(true).equals(false); // should not be here
+        })
+        .catch((err) => {
+          should(err).be.exactly(rejectMsg);
+          StubHANAClient.restore(stub);
+          hana.createClient = original;
+        });
+    });
+
+    it('should return promise with the created connection if no error (hana-client)', function () {
+      const stub = StubHANAClient.getStubForOperatorWithObject(Utils, 'isHANAClient', true);
+      const hana = Utils.getHanaClient();
+      const connection = {PROP: Symbol('TEST_CONNECTION_CREATION')};
+      connection.state = () => 'connected';
+      connection.connect = (parameter, cb) => cb();
+      connection.close = (cb) => cb();
+      const original = hana.createConnection;
+      hana.createConnection = () => connection;
+
       return factory.create({}).then((result) => {
         should(result).be.exactly(connection);
         StubHANAClient.restore(stub);
+        hana.createConnection = original;
+      });
+    });
+
+    it('should return promise with the created connection if no error (node-hdb', function () {
+      const stub = StubHANAClient.getStubForOperatorWithObject(Utils, 'isHANAClient', false);
+      const hana = Utils.getHanaClient();
+      const connection = {PROP: Symbol('TEST_CONNECTION_CREATION')};
+      connection.readyState = 'connected';
+      connection.connect = (cb) => cb();
+      connection.close = (cb) => cb();
+      const original = hana.createClient;
+      hana.createClient = () => connection;
+
+      return factory.create({}).then((result) => {
+        should(result).be.exactly(connection);
+        StubHANAClient.restore(stub);
+        hana.createClient = original;
       });
     });
   });
@@ -70,6 +141,10 @@ describe('Factory', function () {
 
       stub = StubHANAClient.getStubForOperatorWithObject(Utils, 'isHANAClient', false);
       return factory.validate(conn).then((result) => should(result).be.exactly(true));
+    });
+
+    it('should return promise with false if connection is null', function () {
+      return factory.validate(null).then((result) => should(result).be.exactly(false));
     });
   });
 });

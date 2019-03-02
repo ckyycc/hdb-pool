@@ -112,14 +112,17 @@ describe('Utils', function () {
       should(dbParams.user).exactly(params.userName);
       should(dbParams.password).exactly(params.password);
     });
+    it('should return the empty dictionary if params is null', function () {
+      const dbParams = Utils.getPoolParams(null, false);
+      should(dbParams).deepEqual({});
+    });
   });
   describe('#getHanaClient', function () {
     let stub, requireEx;
     beforeEach(() => {
       const _module = require('module');
       // stub = sinon.stub(_module, '_load');
-      stub = Stub.getStub(_module, '_load', () => {
-      });
+      stub = Stub.getStub(_module, '_load', () => {});
       // stub = sinon.stub(module, 'require');
       requireEx = new Error('ERROR');
       requireEx.code = 'MODULE_NOT_FOUND';
