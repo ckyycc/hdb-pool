@@ -2,7 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/hdb-pool.svg?style=flat-square)](https://www.npmjs.com/package/hdb-pool) [![Travis](https://img.shields.io/travis/ckyycc/hdb-pool.svg?style=flat-square)](https://travis-ci.org/ckyycc/hdb-pool) [![Coverage Status](https://coveralls.io/repos/github/ckyycc/hdb-pool/badge.svg?branch=master)](https://coveralls.io/github/ckyycc/hdb-pool?branch=master) [![npm downloads](https://img.shields.io/npm/dm/hdb-pool.svg)](https://www.npmjs.com/package/hdb-pool) [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://github.com/ckyycc/hdb-pool/blob/master/LICENSE)
 
-HANA Database Connection pool for Node.js, inspired by (and copied some ideals from): [Generic Pool](https://github.com/coopernurse/node-pool).
+SAP HANA Database Connection pool for Node.js, inspired by (and copied some ideals from): [Generic Pool](https://github.com/coopernurse/node-pool).
 
 This module supports both the [hana-client](https://help.sap.com/viewer/0eec0d68141541d1b07893a39944924e/2.0.03/en-US/58c18548dab04a438a0f9c44be82b6cd.html) and the [node-hdb](https://github.com/SAP/node-hdb).
 If both are existing, the [hana-client](https://help.sap.com/viewer/0eec0d68141541d1b07893a39944924e/2.0.03/en-US/58c18548dab04a438a0f9c44be82b6cd.html) will be chosen.  
