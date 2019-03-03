@@ -122,7 +122,7 @@ pool.release(connection)
     .catch(err => {...});
 ```
 
-Returning a connection to the pool, the `connection` takes one required argument:
+Returning a `connection` to the pool, the `release` takes one required argument:
 
 - `connection`: a 'borrowed' connection.
 
@@ -135,7 +135,7 @@ pool.destroy(connection)
     .then(() => {...})
     .catch(err => {...});
 ```
-Removing the connection from the pool and destroy the connection itself as well. The function takes one required argument:
+Removing the `connection` from the pool and destroy the `connection` itself as well. The function takes one required argument:
 
 - `connection`: a "borrowed" connection.
 
@@ -148,7 +148,7 @@ pool.clear()
     .catch(err => {...});
 ```
 
-This function clears the pool, removing/destroying all the connections and all the pending requests from the pool. 
+This function clears the `pool`, removing/destroying all the connections and all the pending requests from the pool. 
 
 ### Receiving events from pool
 
@@ -170,7 +170,7 @@ Pool supports 5 different types of events:
 ```js
 const overview = pool.getPoolStatusOverview();
 ```
-This function will show the current status of the pool.
+This function will show current status of the pool.
 
 ## Running tests
 ```bash
