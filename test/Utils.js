@@ -86,6 +86,100 @@ describe('Utils', function () {
     });
   });
   describe('#getPoolParams', function () {
+    it('should return the parameters with correct hostName and port when using serverNode if driver is HANA client', function () {
+      const host = 'test1';
+      const port = '30015';
+      const params = {
+        serverNode: `${host}:${port}`,
+        userName: 'tester',
+        password: 'testPWD'
+      };
+      const dbParams = Utils.getPoolParams(params);
+      should(dbParams.HOST).exactly(host);
+      should(dbParams.PORT).exactly(port);
+      should(dbParams.UID).exactly(params.userName);
+      should(dbParams.PWD).exactly(params.password);
+    });
+
+    it('should return the parameters with correct hostName and port when using serverNode if driver is node-db', function () {
+      const host = 'test1';
+      const port = '30015';
+      const params = {
+        serverNode: `${host}:${port}`,
+        userName: 'tester',
+        password: 'testPWD'
+      };
+      const dbParams = Utils.getPoolParams(params, false);
+      should(dbParams.host).exactly(host);
+      should(dbParams.port).exactly(port);
+      should(dbParams.user).exactly(params.userName);
+      should(dbParams.password).exactly(params.password);
+    });
+
+    it('should return the parameters with uid/pwd when uid/pwd is set in params directly if the driver is HANA client', function () {
+      const params = {
+        hostName: 'test1',
+        port: '30015',
+        UID: 'tester',
+        PWD: 'testPWD'
+      };
+      const dbParams = Utils.getPoolParams(params);
+      should(dbParams.HOST).exactly(params.hostName);
+      should(dbParams.PORT).exactly(params.port);
+      should(dbParams.UID).exactly(params.UID);
+      should(dbParams.PWD).exactly(params.PWD);
+    });
+
+    it('should keep the key/value set in params directly if the driver is HANA client', function () {
+      const params = {
+        hostName: 'test1',
+        port: '30015',
+        UID: 'tester',
+        PWD: 'testPWD',
+        securityTest: 'test1',
+        sslTest: 'test2'
+      };
+      const dbParams = Utils.getPoolParams(params);
+      should(dbParams.HOST).exactly(params.hostName);
+      should(dbParams.PORT).exactly(params.port);
+      should(dbParams.UID).exactly(params.UID);
+      should(dbParams.PWD).exactly(params.PWD);
+      should(dbParams.securityTest).exactly(params.securityTest);
+      should(dbParams.sslTest).exactly(params.sslTest);
+    });
+
+    it('should keep the key/value set in params directly if the driver is node-hdb', function () {
+      const params = {
+        hostName: 'test1',
+        port: '30015',
+        user: 'tester',
+        password: 'testPWD',
+        securityTest: 'test1',
+        sslTest: 'test2'
+      };
+      const dbParams = Utils.getPoolParams(params, false);
+      should(dbParams.host).exactly(params.hostName);
+      should(dbParams.port).exactly(params.port);
+      should(dbParams.user).exactly(params.user);
+      should(dbParams.password).exactly(params.password);
+      should(dbParams.securityTest).exactly(params.securityTest);
+      should(dbParams.sslTest).exactly(params.sslTest);
+    });
+
+    it('should return the parameters with uid/pwd when uid/pwd is set in params directly if the driver is node-hdb', function () {
+      const params = {
+        hostName: 'test1',
+        port: '30015',
+        user: 'tester',
+        password: 'testPWD'
+      };
+      const dbParams = Utils.getPoolParams(params, false);
+      should(dbParams.host).exactly(params.hostName);
+      should(dbParams.port).exactly(params.port);
+      should(dbParams.user).exactly(params.user);
+      should(dbParams.password).exactly(params.password);
+    });
+
     it('should return the parameters for HANA get connection if the driver is HANA client', function () {
       const params = {
         hostName: 'test1',
