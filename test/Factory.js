@@ -11,7 +11,7 @@ describe('Factory', function () {
       const rejectMsg = 'error';
       const stub = StubHANAClient.getStubCreateConnectionFailed(rejectMsg);
       return factory.create({}).catch((err) => {
-        should(err).be.exactly(JSON.stringify(rejectMsg));
+        should(err).be.equalOneOf([rejectMsg, JSON.stringify(rejectMsg)]);
         StubHANAClient.restore(stub);
       });
     });
