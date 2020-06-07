@@ -10,13 +10,17 @@ branches:
   only:
     - master
     - test
+    - dev
 
-# Build
-script:
+install:
   - npm install mocha
   - npm install nyc
   - npm install should
   - npm install sinon
+  - npm install hdb
+
+# Build
+script:
   - npm test
 
 after_success:
