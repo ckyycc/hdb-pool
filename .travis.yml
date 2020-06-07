@@ -17,6 +17,7 @@ install:
   - npm install nyc
   - npm install should
   - npm install sinon
+  - npm install hdb
 
 # Build
 script:
