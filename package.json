@@ -36,11 +36,9 @@
     "/lib",
     "/test"
   ],
-  "optionalDependencies": {
-    "@sap/hana-client": "^2.3.123",
-    "hdb": "^0.17.0"
-  },
   "devDependencies": {
+    "@sap/hana-client": "^2.3.123",
+    "hdb": "^0.17.0",
     "coveralls": "^3.0.3",
     "eslint": "^5.12.1",
     "eslint-config-google": "^0.11.0",
