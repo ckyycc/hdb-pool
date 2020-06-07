@@ -12,7 +12,10 @@ branches:
 
 # Build
 script:
-  - npm install
+  - npm install mocha
+  - npm install nyc
+  - npm install should
+  - npm install sinon
   - npm test
 
 after_success:
