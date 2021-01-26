@@ -193,6 +193,60 @@ describe('Utils', function () {
       should(dbParams.UID).exactly(params.userName);
       should(dbParams.PWD).exactly(params.password);
     });
+    it('should set client session variables if the driver is HANA client', function () {
+      const params = {
+        hostName: 'test1',
+        port: '30015',
+        userName: 'tester',
+        password: 'testPWD',
+        sessionVariables: {
+          application: 'myApplication',
+          foo: 'bar'
+        }
+      };
+
+      const dbParams = Utils.getPoolParams(params);
+      should(dbParams.HOST).exactly(params.hostName);
+      should(dbParams.PORT).exactly(params.port);
+      should(dbParams.UID).exactly(params.userName);
+      should(dbParams.PWD).exactly(params.password);
+      dbParams.should.have.property('sessionVariable:APPLICATION', 'myApplication');
+      dbParams.should.have.property('sessionVariable:FOO', 'bar');
+    });
+    it('should NOT set invalid client session variables if the driver is HANA client', function () {
+      const params = {
+        hostName: 'test1',
+        port: '30015',
+        userName: 'tester',
+        password: 'testPWD',
+        sessionVariables: 'foo:bar'
+      };
+
+      const dbParams = Utils.getPoolParams(params);
+      should(dbParams.HOST).exactly(params.hostName);
+      should(dbParams.PORT).exactly(params.port);
+      should(dbParams.UID).exactly(params.userName);
+      should(dbParams.PWD).exactly(params.password);
+      dbParams.should.not.have.property('sessionVariable:FOO');
+    });
+    it('should NOT set client session variables if the driver is node-hdb', function () {
+      const params = {
+        hostName: 'test1',
+        port: '30015',
+        userName: 'tester',
+        password: 'testPWD',
+        sessionVariables: {
+          foo: 'bar'
+        }
+      };
+
+      const dbParams = Utils.getPoolParams(params, false);
+      should(dbParams.host).exactly(params.hostName);
+      should(dbParams.port).exactly(params.port);
+      should(dbParams.user).exactly(params.userName);
+      should(dbParams.password).exactly(params.password);
+      dbParams.should.not.have.property('sessionVariable:FOO');
+    });
     it('should return the parameters for HANA get connection if the driver is node-hdb', function () {
       const params = {
         hostName: 'test1',

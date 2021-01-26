@@ -90,6 +90,17 @@ A dictionary with following properties:
 - `userName`: user name.
 - `password`: password.
 
+##### Session variables
+
+For `@sap/hana-client`, it's possible to provide client session variables along with the connection properties when establishing a connection. The session variables must be provided as a key-value pair object with the property name `sessionVariables` (see example below). This property is <i>optional</i>.
+
+```js
+sessionVariables: {
+    application: "myApplication",
+    applicationUser: "user"
+}
+```
+
 #### options
 
 An <i>optional</i> dictionary with the any of the following properties:
