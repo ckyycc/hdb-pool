@@ -1,3 +1,5 @@
+# Connection Pooling is fully supported by offical hana client, please use [Node.js Connection Pooling](https://help.sap.com/docs/SAP_HANA_CLIENT/f1b440ded6144a54ada97ff95dac7adf/e252ff9b2cb44dd9925901e39025ce77.html?locale=en-US) instead
+
 # SAP HANA Database Connection Pool for Node
 
 [![npm](https://img.shields.io/npm/v/hdb-pool.svg?style=flat-square)](https://www.npmjs.com/package/hdb-pool) [![Travis](https://img.shields.io/travis/ckyycc/hdb-pool.svg?style=flat-square)](https://travis-ci.org/ckyycc/hdb-pool) [![Coverage Status](https://coveralls.io/repos/github/ckyycc/hdb-pool/badge.svg?branch=master)](https://coveralls.io/github/ckyycc/hdb-pool?branch=master) [![npm downloads](https://img.shields.io/npm/dm/hdb-pool.svg)](https://www.npmjs.com/package/hdb-pool) [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://github.com/ckyycc/hdb-pool/blob/master/LICENSE)
